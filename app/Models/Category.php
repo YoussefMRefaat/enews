@@ -30,6 +30,21 @@ class Category extends Model
         return $this->belongsTo(self::class , 'parent_id');
     }
 
+    /**
+     * Set the relationship between the category and children that belong to it
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\hasMany
+     */
+    public function children(): \Illuminate\Database\Eloquent\Relations\hasMany
+    {
+        return $this->hasMany(self::class , 'parent_id');
+    }
+
+    /**
+     * Set the relationship between the category and topics that belong to it
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function topics(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Topic::class);

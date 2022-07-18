@@ -45,8 +45,25 @@ class UpdateController extends Controller
      */
     public function ban(User $user): \Illuminate\Http\JsonResponse
     {
-        $user->update(['banned' => !$user->banned]);
+        $update = $user->update(['banned' => !$user->banned]);
+
+        if (!$update)
+            abort(500);
+
         $user->tokens()->delete();
+        return response()->json(status: 204);
+    }
+
+
+    /**
+     * Hide all topics of the user
+     *
+     * @param User $user
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function hide(User $user): \Illuminate\Http\JsonResponse
+    {
+        $user->topics()->update(['enabled' => 0]);
         return response()->json(status: 204);
     }
 

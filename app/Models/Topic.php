@@ -50,7 +50,7 @@ class Topic extends Model
      */
     public function tags(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
-        return $this->belongsToMany(Tags::class , 'tag_topic');
+        return $this->belongsToMany(Tag::class , 'tag_topic');
     }
 
     /**
