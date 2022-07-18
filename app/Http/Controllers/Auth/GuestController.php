@@ -57,7 +57,7 @@ class GuestController extends Controller
         SendResetPasswordToken::dispatch($request->validated('email') , $token , $this->seconds);
         return response()->json([
             'message' => 'Token is being sent',
-        ] , 201);
+        ] , 202);
     }
 
 

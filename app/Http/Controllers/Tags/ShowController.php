@@ -18,9 +18,7 @@ class ShowController extends Controller
     {
         $tags = Tag::withCount('topics')->get();
 
-        return response()->json([
-            $tags
-        ], 200);
+        return response()->json($tags, 200);
     }
 
 
@@ -32,11 +30,8 @@ class ShowController extends Controller
      */
     public function show(Tag $tag): \Illuminate\Http\JsonResponse
     {
-        $tag->load('topics');
-
-        return response()->json([
-            $tag
-        ], 200);
+        $tag->load('topics')->paginate(25);
+        return response()->json($tag, 200);
     }
 
 

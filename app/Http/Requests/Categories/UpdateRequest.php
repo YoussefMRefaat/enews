@@ -1,11 +1,10 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Categories;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
-class StoreTagRequest extends FormRequest
+class UpdateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,7 +24,8 @@ class StoreTagRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => [Rule::requiredIf(function(){ return $this->method == 'POST'; }) , 'string'],
+            'name' => ['string'],
+            'parent_id' => ['numeric' , 'exists:categories:id' , 'not_in:' . $this->category->id],
         ];
     }
 }
