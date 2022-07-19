@@ -21,10 +21,7 @@ class UpdateController extends Controller
     {
         $tag->update($request->validated());
 
-        return response()->json([
-            'message' => 'Tag has been created successfully',
-            'id' => $tag->id,
-        ], 201);
+        return response()->json(status: 204);
     }
 
 
