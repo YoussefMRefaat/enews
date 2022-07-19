@@ -29,7 +29,7 @@ class ShowController extends Controller
      */
     public function show(Category $category): \Illuminate\Http\JsonResponse
     {
-        $category->load('topics:id,name' , 'topics.tags:id,name' , 'topics.clerk:id,name')->paginate(25);
+        $category->load('topics:id,title' , 'topics.tags:id,name' , 'topics.clerk:id,name')->paginate(25);
         return response()->json($category , 200);
     }
 
