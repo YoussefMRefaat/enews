@@ -25,7 +25,7 @@ class StoreTagRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => [Rule::requiredIf(function(){ return $this->method() == 'POST'; }) , 'string'],
+            'name' => [Rule::requiredIf(function(){ return $this->method() == 'POST'; }) , 'string' , 'unique:tags'],
         ];
     }
 }
