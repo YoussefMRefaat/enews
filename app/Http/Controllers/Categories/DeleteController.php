@@ -18,7 +18,7 @@ class DeleteController extends Controller
     public function destroy(Category $category){
         $category->load('topics');
 
-        $this->handleTopics($category);
+        $this->handleTopicsAndChildren($category);
         $category->delete();
 
         return response()->json(status: 204);
@@ -31,7 +31,7 @@ class DeleteController extends Controller
      * @param $category
      * @return void
      */
-    private function handleTopics($category): void
+    private function handleTopicsAndChildren($category): void
     {
         if($category->parent_id){
             $category->children()->update(['parent_id' => $category->parent_id]);

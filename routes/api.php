@@ -67,12 +67,12 @@ Route::group([
         Route::group([
             'prefix' => 'categories'
         ] , function (){
-            Route::get('/');
-            Route::get('/{category}');
-            Route::post('/');
-            Route::patch('/{category}');
-            Route::patch('/{category}/status');
-            Route::delete('/{category}');
+            Route::get('/' , [\App\Http\Controllers\Categories\ShowController::class , 'index']);
+            Route::get('/{category}' , [\App\Http\Controllers\Categories\ShowController::class , 'show']);
+            Route::post('/' , [\App\Http\Controllers\Categories\CreateController::class , 'store']);
+            Route::patch('/{category}' , [\App\Http\Controllers\Categories\UpdateController::class , 'update']);
+            Route::patch('/{category}/status' , [\App\Http\Controllers\Categories\UpdateController::class , 'updateStatus']);
+            Route::delete('/{category}' , [\App\Http\Controllers\Categories\DeleteController::class , 'destroy']);
         });
     });
 
