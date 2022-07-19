@@ -30,7 +30,7 @@ class ShowController extends Controller
      */
     public function show(Tag $tag): \Illuminate\Http\JsonResponse
     {
-        $tag->load('topics')->paginate(25);
+        $tag->load('topics:id,name' , 'topics.clerk:id,name' , 'topics.category:id,name')->paginate(25);
         return response()->json($tag, 200);
     }
 

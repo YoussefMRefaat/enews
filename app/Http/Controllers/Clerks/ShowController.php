@@ -28,8 +28,8 @@ class ShowController extends Controller
      */
     public function show(User $user): \Illuminate\Http\JsonResponse
     {
-        $user->load('topics')->paginate(25);
-        return response()->json($user);
+        $user->load('topics' , 'topics.tags:id,name' , 'topics.categories:id,name')->paginate(25);
+        return response()->json($user , 200);
     }
 
 }
