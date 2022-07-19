@@ -32,7 +32,13 @@ class UpdateController extends Controller
      */
     public function updateStatus(Category $category): \Illuminate\Http\JsonResponse
     {
+        if ($category->parent && !$category->parent->enabled)
+            abort(409 , 'Parent category is disabled');
+
         $category->update(['enabled' => !$category->enabled]);
+        if (!$category->enabled)
+            $category->children()->update(['enabled' => false]);
+
         return response()->json(status: 204);
     }
 

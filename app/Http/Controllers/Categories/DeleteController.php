@@ -33,8 +33,8 @@ class DeleteController extends Controller
      */
     private function handleTopicsAndChildren($category): void
     {
+        $category->children()->update(['parent_id' => $category->parent_id]);
         if($category->parent_id){
-            $category->children()->update(['parent_id' => $category->parent_id]);
             $category->topics()->update(['category_id' => $category->parent_id]);
         }else{
             $category->topics()->delete();

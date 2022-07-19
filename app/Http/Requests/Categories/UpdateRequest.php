@@ -24,7 +24,7 @@ class UpdateRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => ['string'],
+            'name' => ['string' , 'unique:categories,name,' . $this->route('category')->id],
             'parent_id' => ['numeric' , 'exists:categories:id' , 'not_in:' . $this->category->id],
         ];
     }
