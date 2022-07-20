@@ -34,7 +34,7 @@ Route::group([
     Route::patch('/me/password' , [\App\Http\Controllers\Auth\UserController::class , 'updatePassword']);
 
     Route::group([
-        'middleware' => ['roles:admin'],
+        'middleware' => ['roles:'.\App\Enums\Roles::Admin->name],
         'prefix' => 'clerks',
     ], function (){
         Route::post('/' , [\App\Http\Controllers\Clerks\CreateController::class , 'store']);
@@ -51,7 +51,7 @@ Route::group([
     });
 
     Route::group([
-        'middleware' => ['roles:admin,moderator'],
+        'middleware' => ['roles:' . \App\Enums\Roles::Admin->name . ',' . \App\Enums\Roles::Moderator->name],
     ] , function (){
         Route::group([
             'prefix' => 'tags'

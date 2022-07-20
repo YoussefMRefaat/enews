@@ -25,8 +25,6 @@ trait EnumValues{
      */
     public static function valuesOf(array $keys): array
     {
-        foreach ($keys as &$key)
-            $key = ucfirst(strtolower($key));
 
         $values = [];
         foreach (static::cases() as $case){
