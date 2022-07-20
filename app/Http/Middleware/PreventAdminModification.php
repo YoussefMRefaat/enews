@@ -16,7 +16,7 @@ class PreventAdminModification
      */
     public function handle(Request $request, Closure $next)
     {
-        if(in_array(\App\Enums\Roles::Admin->value , $request->route('user')->roles))
+        if(in_array(\App\Enums\Roles::Admin->value , $request->route('user')->roles) && auth()->user()->id != $request->route('user')->id)
             abort(403);
         return $next($request);
     }
