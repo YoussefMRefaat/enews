@@ -16,7 +16,7 @@ class ShowController extends Controller
      */
     public function index(): \Illuminate\Http\JsonResponse
     {
-        $categories = Category::withCount('topics')->get();
+        $categories = Category::withCount('topics')->paginate(25);
         return response()->json($categories , 200);
     }
 

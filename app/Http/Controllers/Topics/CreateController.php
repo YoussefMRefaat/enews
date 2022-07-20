@@ -11,6 +11,12 @@ use Illuminate\Http\Request;
 class CreateController extends Controller
 {
 
+    /**
+     * Store an article
+     *
+     * @param StoreRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function storeArticle(StoreRequest $request): \Illuminate\Http\JsonResponse
     {
         $data = $this->prepareData($request->validated() , TopicType::Article->value);
@@ -19,6 +25,12 @@ class CreateController extends Controller
     }
 
 
+    /**
+     * Store news
+     *
+     * @param StoreRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function storeNews(StoreRequest $request): \Illuminate\Http\JsonResponse
     {
         $data = $this->prepareData($request->validated() , TopicType::News->value);
@@ -27,6 +39,10 @@ class CreateController extends Controller
     }
 
 
+    /**
+     * Store a topic
+     *
+     */
     private function store($data): \Illuminate\Http\JsonResponse
     {
         $topic = Topic::create($data);
@@ -40,6 +56,14 @@ class CreateController extends Controller
         ], 201);
     }
 
+
+    /**
+     * Prepare data for storing
+     *
+     * @param array $data
+     * @param string $type
+     * @return array
+     */
     private function prepareData(array $data , string $type): array
     {
         $data['type'] = $type;

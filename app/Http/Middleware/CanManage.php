@@ -16,6 +16,9 @@ class CanManage
      */
     public function handle(Request $request, Closure $next)
     {
+        if(auth()->user()->cannot('manage' , $request->route('topic')))
+            abort(403);
+
         return $next($request);
     }
 }

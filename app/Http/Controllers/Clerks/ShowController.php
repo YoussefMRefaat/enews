@@ -16,7 +16,7 @@ class ShowController extends Controller
      */
     public function index(): \Illuminate\Http\JsonResponse
     {
-        $users = User::withCount('topics')->get();
+        $users = User::withCount('topics')->paginate(25);
         return response()->json($users , 200);
     }
 

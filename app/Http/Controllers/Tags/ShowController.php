@@ -16,7 +16,7 @@ class ShowController extends Controller
      */
     public function index(): \Illuminate\Http\JsonResponse
     {
-        $tags = Tag::withCount('topics')->get();
+        $tags = Tag::withCount('topics')->paginate(15);
 
         return response()->json($tags, 200);
     }

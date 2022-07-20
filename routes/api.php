@@ -74,6 +74,26 @@ Route::group([
             Route::patch('/{category}/status' , [\App\Http\Controllers\Categories\UpdateController::class , 'updateStatus']);
             Route::delete('/{category}' , [\App\Http\Controllers\Categories\DeleteController::class , 'destroy']);
         });
+
+        Route::get('/topics' , [\App\Http\Controllers\Topics\ShowController::class , 'index']);
+    });
+
+    Route::group([
+        'prefix' => '/topics',
+    ], function (){
+        Route::post('/news' , [\App\Http\Controllers\Topics\CreateController::class , 'storeNews'])
+            ->middleware('roles:' . \App\Enums\Roles::Journalist->name);
+        Route::post('/articles' , [\App\Http\Controllers\Topics\CreateController::class , 'storeArticle'])
+            ->middleware('roles:' . \App\Enums\Roles::Writer->name);
+        Route::group([
+            'middleware' => ['canManage']
+        ],function (){
+            Route::get('/{topic}' , [\App\Http\Controllers\Topics\ShowController::class , 'show']);
+            Route::patch('/{topic}' , [\App\Http\Controllers\Topics\UpdateController::class , 'update']);
+            Route::patch('/{topic}/publish' , [\App\Http\Controllers\Topics\UpdateController::class , 'publish']);
+            Route::delete('/{topic}' , [\App\Http\Controllers\Topics\DeleteController::class , 'destroy']);
+        });
+
     });
 
 });
