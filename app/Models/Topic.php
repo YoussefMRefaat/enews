@@ -21,7 +21,8 @@ class Topic extends Model
         'type',
         'title',
         'body',
-        'published'
+        'published',
+        'published_at'
     ];
 
     /**
@@ -30,7 +31,8 @@ class Topic extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'type' => TopicType::class
+        'type' => TopicType::class,
+        'published_at' => 'timestamp',
     ];
 
     /**
@@ -63,5 +65,7 @@ class Topic extends Model
         return $this->belongsTo(Category::class);
     }
 
+    public function publicScope(){} // scope for accessing public topics
 
+    public function tinyDescription(){} // get first n words of the description
 }

@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('body');
             $table->boolean('published');
+            $table->timestamp('published_at')->nullable();
             $table->timestamps();
 
             $table->foreign('clerk_id')->references('id')->on('users')

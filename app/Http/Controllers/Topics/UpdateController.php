@@ -40,7 +40,11 @@ class UpdateController extends Controller
         if (!auth()->user()->publisher)
             abort(403);
 
-        $topic->update(['published' => !$topic->published]);
+        $data = ['published' => !$topic->published];
+        if (!$topic->published && !$topic->published_at)
+            $data['published_at'] = now();
+
+        $topic->update($data);
 
         return response()->json(status: 204);
     }

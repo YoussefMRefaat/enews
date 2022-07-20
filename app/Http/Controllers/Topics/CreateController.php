@@ -71,6 +71,9 @@ class CreateController extends Controller
         if (!auth()->user()->publisher)
             $data['published'] = false;
 
+        if (isset($data['published']))
+            $data['published_at'] = now();
+
         return $data;
     }
 
