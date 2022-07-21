@@ -17,7 +17,7 @@ class ShowController extends Controller
     public function index(): \Illuminate\Http\JsonResponse
     {
         $topics = Topic::with(['clerk:id,name' , 'category:id,name' , 'tags:id,name'])
-            ->orderBy('published_at' , 'desc')
+            ->orderBy('updated_at' , 'desc')
             ->paginate(25);
 
         return response()->json($topics , 200);

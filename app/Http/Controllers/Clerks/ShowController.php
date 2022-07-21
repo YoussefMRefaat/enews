@@ -31,7 +31,7 @@ class ShowController extends Controller
      */
     public function show(User $user): \Illuminate\Http\JsonResponse
     {
-        $user->load('topics:id,title' , 'topics.tags:id,name' , 'topics.categories:id,name')->paginate(25);
+        $user->load('topics:id,title,published' , 'topics.tags:id,name' , 'topics.categories:id,name')->paginate(25);
         return response()->json($user , 200);
     }
 
