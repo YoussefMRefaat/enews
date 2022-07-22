@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Enums\TopicType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
+use function Illuminate\Events\queueable;
 
 class Topic extends Model
 {
@@ -34,6 +36,41 @@ class Topic extends Model
         'type' => TopicType::class,
         'published_at' => 'timestamp',
     ];
+
+    /**
+     * Perform any actions required after the model boots.
+     *
+     * @return void
+     */
+    protected static function booted()
+    {
+        static::created(queueable(function ($topic) {
+            Cache::put('topics' , static::with(['clerk:id,name' , 'category:id,name' , 'tags:id,name'])
+                ->orderBy('updated_at' , 'desc')
+                ->paginate(25));
+        }));
+
+        static::saved(queueable(function ($topic){
+            Cache::put('topic_'.$topic->id , $topic->load(['clerk:id,name' , 'category:id,name' , 'tags:id,name']));
+
+            $topic->category()->update();
+            $topic->clerk()->update();
+            $topic->tags()->update();
+        }));
+    }
+
+    /**
+     * Retrieve the model for a bound value.
+     *
+     * @param  mixed  $value
+     * @param  string|null  $field
+     */
+    public function resolveRouteBinding($value, $field = null)
+    {
+        return Cache::rememberForever('topic_'.$value , function ($value){
+            return static::with(['clerk:id,name' , 'category:id,name' , 'tags:id,name'])->find($value);
+        });
+    }
 
     /**
      * Set the relationship between the topic and the clerk who created it

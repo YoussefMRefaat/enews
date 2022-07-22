@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Categories;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class ShowController extends Controller
 {
@@ -16,7 +17,10 @@ class ShowController extends Controller
      */
     public function index(): \Illuminate\Http\JsonResponse
     {
-        $categories = Category::withCount('topics')->paginate(25);
+        $categories = Cache::rememberForever('tags' , function (){
+            Category::withCount('topics')->orderBy('topics_count' , 'desc')->paginate(25);
+        });
+
         return response()->json($categories , 200);
     }
 
@@ -29,7 +33,6 @@ class ShowController extends Controller
      */
     public function show(Category $category): \Illuminate\Http\JsonResponse
     {
-        $category->load('topics:id,title,published' , 'topics.tags:id,name' , 'topics.clerk:id,name')->paginate(25);
         return response()->json($category , 200);
     }
 

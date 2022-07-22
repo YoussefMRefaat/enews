@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Topics;
 use App\Http\Controllers\Controller;
 use App\Models\Topic;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class ShowController extends Controller
 {
@@ -16,9 +17,11 @@ class ShowController extends Controller
      */
     public function index(): \Illuminate\Http\JsonResponse
     {
-        $topics = Topic::with(['clerk:id,name' , 'category:id,name' , 'tags:id,name'])
-            ->orderBy('updated_at' , 'desc')
-            ->paginate(25);
+        $topics = Cache::rememberForever('topics' , function(){
+            Topic::with(['clerk:id,name' , 'category:id,name' , 'tags:id,name'])
+                ->orderBy('updated_at' , 'desc')
+                ->paginate(25);
+        });
 
         return response()->json($topics , 200);
     }
@@ -32,8 +35,6 @@ class ShowController extends Controller
      */
     public function show(Topic $topic): \Illuminate\Http\JsonResponse
     {
-        $topic->load(['clerk:id,name' , 'category:id,name' , 'tags:id,name']);
-
         return response()->json($topic , 200);
     }
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Clerks;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class ShowController extends Controller
 {
@@ -16,9 +17,11 @@ class ShowController extends Controller
      */
     public function index(): \Illuminate\Http\JsonResponse
     {
-        $users = User::withCount('topics')
-            ->orderBy('topics_count' , 'desc')
-            ->paginate(25);
+        $users = Cache::rememberForever('clerks' , function (){
+            User::withCount('topics')
+                ->orderBy('topics_count' , 'desc')
+                ->paginate(25);
+        });
 
         return response()->json($users , 200);
     }
@@ -31,7 +34,6 @@ class ShowController extends Controller
      */
     public function show(User $user): \Illuminate\Http\JsonResponse
     {
-        $user->load('topics:id,title,published' , 'topics.tags:id,name' , 'topics.categories:id,name')->paginate(25);
         return response()->json($user , 200);
     }
 

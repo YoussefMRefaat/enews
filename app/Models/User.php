@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Cache;
 use Laravel\Sanctum\HasApiTokens;
+use function Illuminate\Events\queueable;
 
 class User extends Authenticatable
 {
@@ -37,6 +39,37 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    /**
+     * Perform any actions required after the model boots.
+     *
+     * @return void
+     */
+    protected static function booted()
+    {
+        static::created(queueable(function () {
+            Cache::put('clerks' , static::withCount('topics')->orderBy('topics_count' , 'desc')->paginate(25));
+        }));
+
+        static::saved(queueable(function ($clerk){
+            Cache::put('clerk_'.$clerk->id , $clerk->load('topics:id,title,published' , 'topics.tags:id,name' , 'topics.categories:id,name'));
+
+            $clerk->topics()->update();
+        }));
+    }
+
+
+    /**
+     * Retrieve the model for a bound value.
+     *
+     * @param  mixed  $value
+     * @param  string|null  $field
+     */
+    public function resolveRouteBinding($value, $field = null)
+    {
+        return Cache::rememberForever('clerk_'.$value , function ($value){
+            return static::with(['topics:id,title,published' , 'topics.tags:id,name' , 'topics.categories:id,name'])->find($value);
+        });
+    }
 
     /**
      * Set the relationship between the clerk and his topics
