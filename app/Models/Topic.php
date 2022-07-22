@@ -51,7 +51,7 @@ class Topic extends Model
         }));
 
         static::saved(queueable(function ($topic){
-            Cache::put('topic_'.$topic->id , $topic->load(['clerk:id,name' , 'category:id,name' , 'tags:id,name']));
+            Cache::put('topic_'.$topic->id , $topic->load('clerk:id,name' , 'category:id,name' , 'tags:id,name'));
 
             $topic->category()->update();
             $topic->clerk()->update();
