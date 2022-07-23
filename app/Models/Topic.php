@@ -53,9 +53,18 @@ class Topic extends Model
         static::saved(queueable(function ($topic){
             Cache::put('topic_'.$topic->id , $topic->load('clerk:id,name' , 'category:id,name' , 'tags:id,name'));
 
-            $topic->category()->update();
-            $topic->clerk()->update();
-            $topic->tags()->update();
+//            $topic->category()->update();
+//            $topic->clerk()->update();
+//            $topic->tags()->update();
+        }));
+
+        static::deleted(queueable(function ($topic){
+            Cache::forget('topic_'.$topic->id);
+            Cache::put('topic_'.$topic->id , $topic->load('clerk:id,name' , 'category:id,name' , 'tags:id,name'));
+
+//            $topic->category()->update();
+//            $topic->clerk()->update();
+//            $topic->tags()->update();
         }));
     }
 
@@ -68,7 +77,7 @@ class Topic extends Model
     public function resolveRouteBinding($value, $field = null)
     {
         return Cache::rememberForever('topic_'.$value , function ($value){
-            return static::with(['clerk:id,name' , 'category:id,name' , 'tags:id,name'])->find($value);
+            return static::with(['clerk:id,name' , 'category:id,name' , 'tags:id,name'])->findOrFail($value);
         });
     }
 

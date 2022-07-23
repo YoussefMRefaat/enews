@@ -38,6 +38,19 @@ class Category extends Model
 
             $category->topics()->update();
         }));
+
+        static::deleting(queueable(function ($category){
+            Cache::forget('category_'.$category->id);
+            Cache::put('categories' , static::whereNot('category_id' , $category->id)->withCount('topics')->orderBy('topics_count' , 'desc')->paginate(25));
+
+            $category->children()->update(['parent_id' => $category->parent_id]);
+            if($category->parent_id){
+                $category->topics()->update(['category_id' => $category->parent_id]);
+            }else{
+                $category->topics()->delete();
+            }
+        }));
+
     }
 
     /**
@@ -49,7 +62,7 @@ class Category extends Model
     public function resolveRouteBinding($value, $field = null)
     {
         return Cache::rememberForever('category_'.$value , function ($value){
-            return static::with(['topics:id,title,published' , 'topics.clerk:id,name' , 'topics.category:id,name'])->find($value);
+            return static::with(['topics:id,title,published' , 'topics.clerk:id,name' , 'topics.category:id,name' , 'parent:id,name' , 'children:id,name'])->findOrFail($value);
         });
     }
 

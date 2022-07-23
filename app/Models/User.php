@@ -55,6 +55,13 @@ class User extends Authenticatable
 
             $clerk->topics()->update();
         }));
+
+        static::deleted(queueable(function ($clerk){
+            Cache::forget('clerk_'.$clerk->id);
+            Cache::put('clerk_'.$clerk->id , $clerk->load('topics:id,title,published' , 'topics.tags:id,name' , 'topics.categories:id,name'));
+
+            $clerk->topics()->delete();
+        }));
     }
 
 
@@ -67,7 +74,7 @@ class User extends Authenticatable
     public function resolveRouteBinding($value, $field = null)
     {
         return Cache::rememberForever('clerk_'.$value , function ($value){
-            return static::with(['topics:id,title,published' , 'topics.tags:id,name' , 'topics.categories:id,name'])->find($value);
+            return static::with(['topics:id,title,published' , 'topics.tags:id,name' , 'topics.categories:id,name'])->findOrFail($value);
         });
     }
 

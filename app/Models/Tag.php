@@ -37,6 +37,13 @@ class Tag extends Model
 
             $tag->topics()->update();
         }));
+
+        static::deleted(queueable(function ($tag){
+            Cache::forget('tag_'.$tag->id);
+            Cache::put('tag_'.$tag->id , $tag->load('topics:id,title,published' , 'topics.clerk:id,name' , 'topics.category:id,name'));
+
+            $tag->topics()->update();
+        }));
     }
 
     /**
@@ -48,7 +55,7 @@ class Tag extends Model
     public function resolveRouteBinding($value, $field = null)
     {
         return Cache::rememberForever('tag_'.$value , function ($value){
-            return static::with(['topics:id,title,published' , 'topics.clerk:id,name' , 'topics.category:id,name'])->find($value);
+            return static::with(['topics:id,title,published' , 'topics.clerk:id,name' , 'topics.category:id,name'])->findOrFail($value);
         });
     }
 

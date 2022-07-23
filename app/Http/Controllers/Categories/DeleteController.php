@@ -16,30 +16,9 @@ class DeleteController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(Category $category){
-        $category->load('topics');
-
-        $this->handleTopicsAndChildren($category);
         $category->delete();
 
         return response()->json(status: 204);
     }
-
-
-    /**
-     * Handle topics of the deleted category
-     *
-     * @param $category
-     * @return void
-     */
-    private function handleTopicsAndChildren($category): void
-    {
-        $category->children()->update(['parent_id' => $category->parent_id]);
-        if($category->parent_id){
-            $category->topics()->update(['category_id' => $category->parent_id]);
-        }else{
-            $category->topics()->delete();
-        }
-    }
-
 
 }
