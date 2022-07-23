@@ -23,6 +23,16 @@ class Tag extends Model
     ];
 
     /**
+     * Columns that are available for public
+     *
+     * @var array
+     */
+    protected array $publicColumns = [
+        'name',
+        'topics',
+    ];
+
+    /**
      * Relations will be cached with the entity
      *
      * @var array<string>
@@ -61,9 +71,17 @@ class Tag extends Model
      */
     public function resolveRouteBinding($value, $field = null)
     {
-        return Cache::rememberForever('tag_'.$value , function ($value){
-            return static::with($this->cacheRelations)->findOrFail($value);
-        });
+        return $this->findFromCache($value);
+    }
+
+    /**
+     * Get models from the cache.
+     *
+     * @return \Illuminate\Pagination\LengthAwarePaginator
+     */
+    public function index(): \Illuminate\Pagination\LengthAwarePaginator
+    {
+        return $this->getFromCache();
     }
 
     /**

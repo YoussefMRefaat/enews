@@ -42,13 +42,13 @@ trait ModelCacher{
         });
     }
 
-    private function indexCacheQuery(string $orderBy, string $orderDir, array|null $relations, string|null $countRelations)
+    private function indexCacheQuery(string $orderBy, string $orderDir, array|null $relations, string|null $countRelations): \Illuminate\Pagination\LengthAwarePaginator
     {
         $query = $this->orderBy($orderBy , $orderDir);
         $query = $relations ? $query->with($relations) : $query;
         $query = $countRelations ? $query->withCount($countRelations) : $query;
 
-        return auth()->check() ? $query->paginate(25) : $query->only($this->publicColumns)->paginate(25);
+        return auth()->check() ? collectionPaginate($query->all() , 25) : collectionPaginate($query->only($this->publicColumns)->all() , 25);
     }
 
 }

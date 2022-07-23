@@ -29,6 +29,22 @@ class Topic extends Model
     ];
 
     /**
+     * Columns that are available for public
+     *
+     * @var array
+     */
+    protected array $publicColumns = [
+        'name',
+        'type',
+        'title',
+        'body',
+        'published_at',
+        'clerk',
+        'category',
+        'tags',
+    ];
+
+    /**
      * The attributes that should be cast.
      *
      * @var array<string, string>
@@ -82,12 +98,21 @@ class Topic extends Model
      *
      * @param  mixed  $value
      * @param  string|null  $field
+     * @return \Illuminate\Database\Eloquent\Model|null
      */
-    public function resolveRouteBinding($value, $field = null)
+    public function resolveRouteBinding($value, $field = null): ?Model
     {
-        return Cache::rememberForever('topic_'.$value , function ($value){
-            return static::with($this->cacheRelations)->findOrFail($value);
-        });
+        return $this->findFromCache($value);
+    }
+
+    /**
+     * Get models from the cache.
+     *
+     * @return \Illuminate\Pagination\LengthAwarePaginator
+     */
+    public function index(): \Illuminate\Pagination\LengthAwarePaginator
+    {
+        return $this->getFromCache('published_at' , 'desc' , $this->cacheRelations , null);
     }
 
     /**

@@ -31,8 +31,8 @@ class Category extends Model
     protected array $publicColumns = [
         'name',
         'parent_id',
+        'topics',
     ];
-
 
     /**
      * Relations will be cached with the entity
@@ -90,11 +90,11 @@ class Category extends Model
     /**
      * Get models from the cache.
      *
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return \Illuminate\Pagination\LengthAwarePaginator
      */
-    public function index(): \Illuminate\Database\Eloquent\Collection
+    public function index(): \Illuminate\Pagination\LengthAwarePaginator
     {
-        $this->getFromCache();
+        return $this->getFromCache();
     }
 
     /**
