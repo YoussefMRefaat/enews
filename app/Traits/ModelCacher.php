@@ -30,9 +30,10 @@ trait ModelCacher{
     }
 
     public function findFromCache(int $value){
-        return Cache::rememberForever(strtolower(get_class($this)) . '_' .$value , function ($value){
+        $cache =  Cache::rememberForever(strtolower(get_class($this)) . '_' .$value , function ($value){
             return $this->with($this->cacheRelations)->findOrFail($value);
         });
+        return auth()->check() ? $cache : $cache->only($this->publicColumns);
     }
 
     public function getFromCache(string $orderBy = 'topics_count' , string $orderDir = 'desc' , array|null $relations = null , string|null $countRelations = 'topics')
