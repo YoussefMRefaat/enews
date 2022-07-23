@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Traits\ModelCacher;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -13,7 +13,7 @@ use function Illuminate\Events\queueable;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, ModelCacher;
 
     /**
      * The attributes that are mass assignable.
@@ -40,27 +40,36 @@ class User extends Authenticatable
     ];
 
     /**
+     * Relations will be cached with the entity
+     *
+     * @var array|string[]
+     */
+    public array $cacheRelations = [
+        'topics:id,title,published',
+        'topics.tags:id,name',
+        'topics.category:id,name',
+    ];
+
+    /**
      * Perform any actions required after the model boots.
      *
      * @return void
      */
     protected static function booted()
     {
-        static::created(queueable(function () {
-            Cache::put('clerks' , static::withCount('topics')->orderBy('topics_count' , 'desc')->paginate(25));
+        static::saved(queueable(function ($clerk){
+            $clerk->cache($this->cacheRelations);
+            $clerk->indexCache();
+            $clerk->topics()->cache();
         }));
 
-        static::saved(queueable(function ($clerk){
-            Cache::put('clerk_'.$clerk->id , $clerk->load('topics:id,title,published' , 'topics.tags:id,name' , 'topics.categories:id,name'));
-
-            $clerk->topics()->update();
+        static::deleting(queueable(function ($clerk){
+            $clerk->topics()->delete();
         }));
 
         static::deleted(queueable(function ($clerk){
-            Cache::forget('clerk_'.$clerk->id);
-            Cache::put('clerk_'.$clerk->id , $clerk->load('topics:id,title,published' , 'topics.tags:id,name' , 'topics.categories:id,name'));
-
-            $clerk->topics()->delete();
+            $clerk->dropCache();
+            $clerk->indexCache();
         }));
     }
 
@@ -73,8 +82,8 @@ class User extends Authenticatable
      */
     public function resolveRouteBinding($value, $field = null)
     {
-        return Cache::rememberForever('clerk_'.$value , function ($value){
-            return static::with(['topics:id,title,published' , 'topics.tags:id,name' , 'topics.categories:id,name'])->findOrFail($value);
+        return Cache::rememberForever('user_'.$value , function ($value){
+            return static::with($this->cacheRelations)->findOrFail($value);
         });
     }
 

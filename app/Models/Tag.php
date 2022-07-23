@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\ModelCacher;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
@@ -9,7 +10,7 @@ use function Illuminate\Events\queueable;
 
 class Tag extends Model
 {
-    use HasFactory;
+    use HasFactory, ModelCacher;
 
     /**
      * The attributes that are mass assignable.
@@ -22,27 +23,33 @@ class Tag extends Model
     ];
 
     /**
+     * Relations will be cached with the entity
+     *
+     * @var array<string>
+     */
+    public array $cacheRelations = [
+        'topics:id,title,published',
+        'topics.category:id,name',
+        'topics.clerk:id,name',
+    ];
+
+    /**
      * Perform any actions required after the model boots.
      *
      * @return void
      */
     protected static function booted()
     {
-        static::created(queueable(function ($tag) {
-            Cache::put('tags' , static::withCount('topics')->orderBy('topics_count' , 'desc')->paginate(25));
-        }));
-
         static::saved(queueable(function ($tag){
-            Cache::put('tag_'.$tag->id , $tag->load('topics:id,title,published' , 'topics.clerk:id,name' , 'topics.category:id,name'));
-
-            $tag->topics()->update();
+            $tag->indexCache();
+            $tag->cache($this->cacheRelations);
+            $tag->topics()->cache();
         }));
 
         static::deleted(queueable(function ($tag){
-            Cache::forget('tag_'.$tag->id);
-            Cache::put('tag_'.$tag->id , $tag->load('topics:id,title,published' , 'topics.clerk:id,name' , 'topics.category:id,name'));
-
-            $tag->topics()->update();
+            $tag->dropCache();
+            $tag->indexCache();
+            $tag->topics()->cache();
         }));
     }
 
@@ -55,7 +62,7 @@ class Tag extends Model
     public function resolveRouteBinding($value, $field = null)
     {
         return Cache::rememberForever('tag_'.$value , function ($value){
-            return static::with(['topics:id,title,published' , 'topics.clerk:id,name' , 'topics.category:id,name'])->findOrFail($value);
+            return static::with($this->cacheRelations)->findOrFail($value);
         });
     }
 

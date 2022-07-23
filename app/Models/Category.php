@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\ModelCacher;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
@@ -9,7 +10,7 @@ use function Illuminate\Events\queueable;
 
 class Category extends Model
 {
-    use HasFactory;
+    use HasFactory, ModelCacher;
 
     /**
      * The attributes that are mass assignable.
@@ -23,26 +24,43 @@ class Category extends Model
     ];
 
     /**
+     * Columns that are available for public
+     *
+     * @var array
+     */
+    protected array $publicColumns = [
+        'name',
+        'parent_id',
+    ];
+
+
+    /**
+     * Relations will be cached with the entity
+     *
+     * @var array|string[]
+     */
+    public array $cacheRelations = [
+        'topics:id,title,published',
+        'topics.tags:id,name',
+        'topics.clerk:id,name',
+        'parent:id,name',
+        'children:id,name',
+    ];
+
+    /**
      * Perform any actions required after the model boots.
      *
      * @return void
      */
     protected static function booted()
     {
-        static::created(queueable(function () {
-            Cache::put('categories' , static::withCount('topics')->orderBy('topics_count' , 'desc')->paginate(25));
-        }));
-
         static::saved(queueable(function ($category){
-            Cache::put('category_'.$category->id , $category->load('topics:id,title,published' , 'topics.tags:id,name' , 'topics.clerk:id,name'));
-
-            $category->topics()->update();
+            $category->cache($this->cacheRelations);
+            $category->indexCache();
+            $category->topics()->cache();
         }));
 
         static::deleting(queueable(function ($category){
-            Cache::forget('category_'.$category->id);
-            Cache::put('categories' , static::whereNot('category_id' , $category->id)->withCount('topics')->orderBy('topics_count' , 'desc')->paginate(25));
-
             $category->children()->update(['parent_id' => $category->parent_id]);
             if($category->parent_id){
                 $category->topics()->update(['category_id' => $category->parent_id]);
@@ -51,6 +69,10 @@ class Category extends Model
             }
         }));
 
+        static::deleted(queueable(function ($category){
+            $category->dropCache();
+            $category->indexCache();
+        }));
     }
 
     /**
@@ -58,12 +80,21 @@ class Category extends Model
      *
      * @param  mixed  $value
      * @param  string|null  $field
+     * @return \Illuminate\Database\Eloquent\Model|null
      */
-    public function resolveRouteBinding($value, $field = null)
+    public function resolveRouteBinding($value, $field = null): ?Model
     {
-        return Cache::rememberForever('category_'.$value , function ($value){
-            return static::with(['topics:id,title,published' , 'topics.clerk:id,name' , 'topics.category:id,name' , 'parent:id,name' , 'children:id,name'])->findOrFail($value);
-        });
+        return $this->findFromCache($value);
+    }
+
+    /**
+     * Get models from the cache.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function index(): \Illuminate\Database\Eloquent\Collection
+    {
+        $this->getFromCache();
     }
 
     /**

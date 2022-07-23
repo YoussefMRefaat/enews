@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\TopicType;
+use App\Traits\ModelCacher;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
@@ -10,7 +11,7 @@ use function Illuminate\Events\queueable;
 
 class Topic extends Model
 {
-    use HasFactory;
+    use HasFactory, ModelCacher;
 
     /**
      * The attributes that are mass assignable.
@@ -38,33 +39,41 @@ class Topic extends Model
     ];
 
     /**
+     * Relations will be cached with the entity
+     *
+     * @var array<string>
+     */
+    public array $cacheRelations = [
+        'clerk:id,name',
+        'category:id,name',
+        'tags:id,name',
+    ];
+
+    /**
      * Perform any actions required after the model boots.
      *
      * @return void
      */
     protected static function booted()
     {
-        static::created(queueable(function ($topic) {
-            Cache::put('topics' , static::with(['clerk:id,name' , 'category:id,name' , 'tags:id,name'])
-                ->orderBy('updated_at' , 'desc')
-                ->paginate(25));
-        }));
-
         static::saved(queueable(function ($topic){
-            Cache::put('topic_'.$topic->id , $topic->load('clerk:id,name' , 'category:id,name' , 'tags:id,name'));
+            $topic->indexCache('published_at' , 'desc' , $this->cacheRelations , null);
+            $topic->cache($this->cacheRelations);
 
-//            $topic->category()->update();
-//            $topic->clerk()->update();
-//            $topic->tags()->update();
+            // refresh caching
+            $topic->category()->update();
+            $topic->clerk()->update();
+            $topic->tags()->update();
         }));
 
         static::deleted(queueable(function ($topic){
-            Cache::forget('topic_'.$topic->id);
-            Cache::put('topic_'.$topic->id , $topic->load('clerk:id,name' , 'category:id,name' , 'tags:id,name'));
+            $topic->drppCache();
+            $topic->indexCache('published_at' , 'desc' , $this->cacheRelations , null);
 
-//            $topic->category()->update();
-//            $topic->clerk()->update();
-//            $topic->tags()->update();
+            // refresh caching
+            $topic->category()->update();
+            $topic->clerk()->update();
+            $topic->tags()->update();
         }));
     }
 
@@ -77,7 +86,7 @@ class Topic extends Model
     public function resolveRouteBinding($value, $field = null)
     {
         return Cache::rememberForever('topic_'.$value , function ($value){
-            return static::with(['clerk:id,name' , 'category:id,name' , 'tags:id,name'])->findOrFail($value);
+            return static::with($this->cacheRelations)->findOrFail($value);
         });
     }
 
@@ -113,5 +122,4 @@ class Topic extends Model
 
     public function publicScope(){} // scope for accessing public topics
 
-    public function tinyDescription(){} // get first n words of the description
 }
