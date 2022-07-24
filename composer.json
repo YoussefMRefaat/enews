@@ -30,10 +30,7 @@
     "autoload-dev": {
         "psr-4": {
             "Tests\\": "tests/"
-        },
-        "files": [
-            "App/Helpers/Collection.php"
-        ]
+        }
     },
     "scripts": {
         "post-autoload-dump": [
