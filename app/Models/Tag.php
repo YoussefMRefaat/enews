@@ -66,10 +66,11 @@ class Tag extends Model
     /**
      * Retrieve the model for a bound value.
      *
-     * @param  mixed  $value
-     * @param  string|null  $field
+     * @param mixed $value
+     * @param null $field
+     * @return Model|null
      */
-    public function resolveRouteBinding($value, $field = null)
+    public function resolveRouteBinding($value, $field = null): ?Model
     {
         return $this->findFromCache($value);
     }

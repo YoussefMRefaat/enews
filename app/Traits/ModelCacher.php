@@ -9,47 +9,81 @@ trait ModelCacher{
 
     /**
      * Cache an entity
+     *
+     * @return void
      */
-    public function cache(array $relations){
+    public function cache(array $relations)
+    {
         Cache::put(strtolower(class_basename($this)) . '_' . $this->id , $this->load($this->cacheRelations));
     }
 
     /**
      * Cache the index of entities
+     *
+     * @return void
      */
-    public function indexCache(string $orderBy = 'topics_count' , string $orderDir = 'desc' , array|null $relations = null , string|null $countRelations = 'topics'){
-        $entities = $this->indexCacheQuery($orderBy , $orderDir , $relations , $countRelations);
-        Cache::put(Str::plural(strtolower(class_basename($this))) , $entities);
+    public function indexCache(string $orderBy = 'topics_count' , string $orderDir = 'desc' , array|null $relations = null , string|null $countRelations = 'topics')
+    {
+        Cache::put(Str::plural(strtolower(class_basename($this))) , $this->indexCacheQuery($orderBy , $orderDir , $relations , $countRelations));
     }
 
     /**
      * Drop a cache of an entity
+     *
+     * @return void
      */
-    public function dropCache(){
+    public function dropCache()
+    {
         Cache::forget(strtolower(class_basename($this)) . '_' . $this->id);
     }
 
-    public function findFromCache(int $value){
+    /**
+     * Find an entity from the cache
+     *
+     * @param int $value
+     * @return \Illuminate\Database\Eloquent\Model|null
+     */
+    public function findFromCache(int $value): ?\Illuminate\Database\Eloquent\Model
+    {
         $cache =  Cache::rememberForever(strtolower(get_class($this)) . '_' .$value , function ($value){
             return $this->with($this->cacheRelations)->findOrFail($value);
         });
         return auth()->check() ? $cache : $cache->only($this->publicColumns);
     }
 
-    public function getFromCache(string $orderBy = 'topics_count' , string $orderDir = 'desc' , array|null $relations = null , string|null $countRelations = 'topics')
+    /**
+     * Get entities from the cache
+     *
+     * @param string $orderBy
+     * @param string $orderDir
+     * @param array|null $relations
+     * @param string|null $countRelations
+     * @return \Illuminate\Pagination\LengthAwarePaginator
+     */
+    public function getFromCache(string $orderBy = 'topics_count' , string $orderDir = 'desc' , array|null $relations = null , string|null $countRelations = 'topics'): \Illuminate\Pagination\LengthAwarePaginator
     {
-        return Cache::rememberForever(Str::plural(strtolower(class_basename($this))) , function ($orderBy , $orderDir , $relations , $countRelations){
+        $data = Cache::rememberForever(Str::plural(strtolower(class_basename($this))) , function ($orderBy , $orderDir , $relations , $countRelations){
             $this->indexCacheQuery($orderBy , $orderDir , $relations , $countRelations);
         });
+        return auth()->check() ? $data : $data->only($this->publicColumns);
     }
 
+    /**
+     * Execute getting entities from the DB query
+     *
+     * @param string $orderBy
+     * @param string $orderDir
+     * @param array|null $relations
+     * @param string|null $countRelations
+     * @return \Illuminate\Pagination\LengthAwarePaginator
+     */
     private function indexCacheQuery(string $orderBy, string $orderDir, array|null $relations, string|null $countRelations): \Illuminate\Pagination\LengthAwarePaginator
     {
         $query = $this->orderBy($orderBy , $orderDir);
         $query = $relations ? $query->with($relations) : $query;
         $query = $countRelations ? $query->withCount($countRelations) : $query;
 
-        return auth()->check() ? collectionPaginate($query->all() , 25) : collectionPaginate($query->only($this->publicColumns)->all() , 25);
+        return $query->paginate(25);
     }
 
 }
