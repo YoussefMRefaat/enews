@@ -45,6 +45,9 @@ class Category extends Model
         'topics.clerk:id,name',
         'parent:id,name',
         'children:id,name',
+        'children.topics:id,title,published',
+        'children.topics.tags:id,name',
+        'children.topics.clerk:id,name',
     ];
 
     /**
