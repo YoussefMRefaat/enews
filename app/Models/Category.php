@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Traits\ModelCacher;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use function Illuminate\Events\queueable;
 
@@ -28,11 +30,11 @@ class Category extends Model
      *
      * @var array
      */
-    protected array $publicColumns = [
-        'name',
-        'parent_id',
-        'topics',
-    ];
+//    public array $publicColumns = [
+//        'name',
+//        'parent_id',
+//        'topics',
+//    ];
 
     /**
      * Relations will be cached with the entity
@@ -45,9 +47,6 @@ class Category extends Model
         'topics.clerk:id,name',
         'parent:id,name',
         'children:id,name',
-        'children.topics:id,title,published',
-        'children.topics.tags:id,name',
-        'children.topics.clerk:id,name',
     ];
 
     /**

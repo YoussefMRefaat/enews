@@ -33,16 +33,16 @@ class Topic extends Model
      *
      * @var array
      */
-    protected array $publicColumns = [
-        'name',
-        'type',
-        'title',
-        'body',
-        'published_at',
-        'clerk',
-        'category',
-        'tags',
-    ];
+//    public array $publicColumns = [
+//        'name',
+//        'type',
+//        'title',
+//        'body',
+//        'published_at',
+//        'clerk',
+//        'category',
+//        'tags',
+//    ];
 
     /**
      * The attributes that should be cast.
@@ -112,7 +112,7 @@ class Topic extends Model
      */
     public function index(): \Illuminate\Pagination\LengthAwarePaginator
     {
-        return $this->getFromCache('published_at' , 'desc' , $this->cacheRelations , null);
+        return $this->getFromCache('published_at' , 'desc' , $this->cacheRelations , false);
     }
 
     /**

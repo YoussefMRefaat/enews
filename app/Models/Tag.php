@@ -27,10 +27,10 @@ class Tag extends Model
      *
      * @var array
      */
-    protected array $publicColumns = [
-        'name',
-        'topics',
-    ];
+//    public array $publicColumns = [
+//        'name',
+//        'topics',
+//    ];
 
     /**
      * Relations will be cached with the entity

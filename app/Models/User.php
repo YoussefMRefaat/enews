@@ -35,11 +35,11 @@ class User extends Authenticatable
      *
      * @var array
      */
-    protected array $publicColumns = [
-        'name',
-        'email',
-        'topics',
-    ];
+//    public array $publicColumns = [
+//        'name',
+//        'email',
+//        'topics',
+//    ];
 
     /**
      * The attributes that should be hidden for serialization.
