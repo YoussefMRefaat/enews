@@ -45,9 +45,9 @@ class CreateController extends Controller
      */
     private function store($data): \Illuminate\Http\JsonResponse
     {
-        $topic = Topic::create($data);
+        $topic = Topic::create(array_merge($data , ['clerk_id' => auth()->id()]));
 
-        if ($data['tags'])
+        if (isset($data['tags']))
             $topic->tags()->attach($data['tags']);
 
         return response()->json([

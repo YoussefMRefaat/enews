@@ -15,7 +15,7 @@ trait ModelCacher{
      */
     public function cache(array $relations)
     {
-        Cache::put(strtolower(class_basename($this)) . '_' . $this->id , $this->load($this->cacheRelations));
+        Cache::put(strtolower(class_basename(static::class)) . '_' . $this->id , $this->load($this->cacheRelations));
     }
 
     /**
@@ -25,7 +25,7 @@ trait ModelCacher{
      */
     public function indexCache(string $orderBy = 'topics_count' , string $orderDir = 'desc' , array|null $relations = null , bool $withCountTopics = true)
     {
-        Cache::put(Str::plural(strtolower(class_basename($this))) , $this->indexCacheQuery($orderBy , $orderDir , $relations , $withCountTopics));
+        Cache::put(Str::plural(strtolower(class_basename(static::class))) , $this->indexCacheQuery($orderBy , $orderDir , $relations , $withCountTopics));
     }
 
     /**
@@ -35,7 +35,7 @@ trait ModelCacher{
      */
     public function dropCache()
     {
-        Cache::forget(strtolower(class_basename($this)) . '_' . $this->id);
+        Cache::forget(strtolower(class_basename(static::class)) . '_' . $this->id);
     }
 
     /**
@@ -46,7 +46,7 @@ trait ModelCacher{
      */
     public function findFromCache(int $value): ?\Illuminate\Database\Eloquent\Model
     {
-        return  Cache::rememberForever(strtolower(get_class($this)) . '_' .$value , function ($value){
+        return  Cache::rememberForever(strtolower(class_basename(static::class)) . '_' .$value , function () use ($value){
             return $this->with($this->cacheRelations)->findOrFail($value);
         });
     }
@@ -62,7 +62,7 @@ trait ModelCacher{
      */
     public function getFromCache(string $orderBy = 'topics_count' , string $orderDir = 'desc' , array|null $relations = null , bool $withCountTopics = true): \Illuminate\Pagination\LengthAwarePaginator
     {
-        return Cache::rememberForever(Str::plural(strtolower(class_basename($this))) , function () use ($orderBy , $orderDir , $relations , $withCountTopics){
+        return Cache::rememberForever(Str::plural(strtolower(class_basename(static::class))) , function () use ($orderBy , $orderDir , $relations , $withCountTopics){
             $this->indexCacheQuery($orderBy , $orderDir , $relations , $withCountTopics);
         });
     }

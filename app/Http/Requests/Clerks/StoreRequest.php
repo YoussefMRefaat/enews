@@ -30,7 +30,7 @@ class StoreRequest extends FormRequest
             'email' => ['required' , 'email' , 'unique:users'],
             'password' => ['required' , 'string' , 'confirmed'],
             'roles' => ['required' , 'array' , 'min:1'],
-            'roles.*' => [ Rule::In(Roles::valuesOf(['moderator' , 'writer' , 'journalist']))],
+            'roles.*' => [ Rule::In([Roles::Writer->value , Roles::Moderator->value , Roles::Journalist->value])],
             'publisher' => ['boolean'],
         ];
     }

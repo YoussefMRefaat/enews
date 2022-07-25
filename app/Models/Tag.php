@@ -53,13 +53,13 @@ class Tag extends Model
         static::saved(queueable(function ($tag){
             $tag->indexCache();
             $tag->cache($this->cacheRelations);
-            $tag->topics()->cache();
+//            $tag->topics()->cache();
         }));
 
         static::deleted(queueable(function ($tag){
             $tag->dropCache();
             $tag->indexCache();
-            $tag->topics()->cache();
+//            $tag->topics()->cache();
         }));
     }
 

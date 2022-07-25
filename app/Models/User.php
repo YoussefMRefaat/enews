@@ -70,9 +70,9 @@ class User extends Authenticatable
     protected static function booted()
     {
         static::saved(queueable(function ($clerk){
-            $clerk->cache($this->cacheRelations);
+            $clerk->cache($clerk->cacheRelations);
             $clerk->indexCache();
-            $clerk->topics()->cache();
+//            $clerk->topics()->cache();
         }));
 
         static::deleting(queueable(function ($clerk){
@@ -128,10 +128,6 @@ class User extends Authenticatable
             get:fn($value) => explode(',' , $value),
             set:fn($value) => implode(',' , $value),
         );
-    }
-
-    public function scopePublic($query){
-
     }
 
 }

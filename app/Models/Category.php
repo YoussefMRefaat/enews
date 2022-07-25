@@ -57,9 +57,14 @@ class Category extends Model
     protected static function booted()
     {
         static::saved(queueable(function ($category){
-            $category->cache($this->cacheRelations);
+            $category->cache($category->cacheRelations);
             $category->indexCache();
-            $category->topics()->cache();
+
+//            $topics = $category->loadMissing('topics')->topics;
+//            $topics->map(function ($topic){
+//                $topic->RefreshCache();
+//            });
+//            $topics->first()->RefreshIndexCache();
         }));
 
         static::deleting(queueable(function ($category){
@@ -128,4 +133,5 @@ class Category extends Model
     {
         return $this->hasMany(Topic::class);
     }
+
 }
