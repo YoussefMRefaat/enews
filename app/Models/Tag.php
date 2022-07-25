@@ -37,11 +37,7 @@ class Tag extends Model
      *
      * @var array<string>
      */
-    public array $cacheRelations = [
-        'topics:id,title,published',
-        'topics.category:id,name',
-        'topics.clerk:id,name',
-    ];
+    public array $cacheRelations = [];
 
     /**
      * Perform any actions required after the model boots.

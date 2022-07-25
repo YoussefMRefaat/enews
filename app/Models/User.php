@@ -56,11 +56,7 @@ class User extends Authenticatable
      *
      * @var array|string[]
      */
-    public array $cacheRelations = [
-        'topics:id,title,published',
-        'topics.tags:id,name',
-        'topics.category:id,name',
-    ];
+    public array $cacheRelations = [];
 
     /**
      * Perform any actions required after the model boots.

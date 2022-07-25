@@ -42,9 +42,6 @@ class Category extends Model
      * @var array|string[]
      */
     public array $cacheRelations = [
-        'topics:id,title,published',
-        'topics.tags:id,name',
-        'topics.clerk:id,name',
         'parent:id,name',
         'children:id,name',
     ];
@@ -59,12 +56,6 @@ class Category extends Model
         static::saved(queueable(function ($category){
             $category->cache($category->cacheRelations);
             $category->indexCache();
-
-//            $topics = $category->loadMissing('topics')->topics;
-//            $topics->map(function ($topic){
-//                $topic->RefreshCache();
-//            });
-//            $topics->first()->RefreshIndexCache();
         }));
 
         static::deleting(queueable(function ($category){
@@ -91,7 +82,8 @@ class Category extends Model
      */
     public function resolveRouteBinding($value, $field = null): ?Model
     {
-        return $this->findFromCache($value);
+        $category =  $this->findFromCache($value);
+        // get category topics // same in tag and user models
     }
 
     /**

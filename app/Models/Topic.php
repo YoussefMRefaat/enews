@@ -75,21 +75,11 @@ class Topic extends Model
         static::saved(queueable(function ($topic){
             $topic->indexCache('published_at' , 'desc' , $topic->cacheRelations , false);
             $topic->cache($topic->cacheRelations);
-
-            // refresh caching
-//            $topic->category()->update();
-//            $topic->clerk()->update();
-//            $topic->tags()->update();
         }));
 
         static::deleted(queueable(function ($topic){
             $topic->drppCache();
             $topic->indexCache('published_at' , 'desc' , $topic->cacheRelations , false);
-
-            // refresh caching
-//            $topic->category()->update();
-//            $topic->clerk()->update();
-//            $topic->tags()->update();
         }));
     }
 
