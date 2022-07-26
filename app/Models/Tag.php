@@ -48,7 +48,7 @@ class Tag extends Model
     {
         static::saved(queueable(function ($tag){
             $tag->indexCache();
-            $tag->cache($this->cacheRelations);
+            $tag->cache($tag->cacheRelations);
 //            $tag->topics()->cache();
         }));
 
@@ -68,7 +68,14 @@ class Tag extends Model
      */
     public function resolveRouteBinding($value, $field = null): ?Model
     {
-        return $this->findFromCache($value);
+        $tag = $this->findFromCache($value);
+        // only if get - not update
+        $tag->relatedTopics = Cache::get('topics')->filter(function ($value , $key) use ($tag){
+            return array_filter($value->tags->toArray() , function ($val) use ($tag){
+                return $tag->id == $val['id'];
+            });
+        });
+        return $tag;
     }
 
     /**

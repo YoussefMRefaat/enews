@@ -25,7 +25,21 @@ class StoreTagRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => [Rule::requiredIf(function(){ return $this->method() == 'POST'; }) , 'string' , 'unique:tags,name,' . $this->route('tag')->id],
+            'name' => [Rule::requiredIf(function(){ return $this->method() == 'POST'; }) , 'string' , $this->uniqueExcept()]
         ];
     }
+
+    /**
+     * Check if the unique rule has exception and return the rule
+     *
+     * @return string
+     */
+    private function uniqueExcept(): string
+    {
+        $rule = 'unique:tags,name';
+        if ($this->method() == 'PATCH')
+            $rule .= ',' . $this->route('tag')->id;
+        return $rule;
+    }
+
 }

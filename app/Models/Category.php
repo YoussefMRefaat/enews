@@ -83,7 +83,9 @@ class Category extends Model
     public function resolveRouteBinding($value, $field = null): ?Model
     {
         $category =  $this->findFromCache($value);
-        // get category topics // same in tag and user models
+        // only if getting
+        $category->relatedTopics = Cache::get('topics')->where('category_id' , $value);
+        return $category;
     }
 
     /**

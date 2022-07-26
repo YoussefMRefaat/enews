@@ -30,7 +30,7 @@ class TopicPolicy
      */
     public function manage(User $user , Topic $topic): bool
     {
-        $roles = [\App\Enums\Roles::Admin->name , \App\Enums\Roles::Moderator->name];
+        $roles = [\App\Enums\Roles::Admin->value , \App\Enums\Roles::Moderator->value];
 
         return $user->id == $topic->clerk_id || array_intersect($user->roles , $roles);
     }
