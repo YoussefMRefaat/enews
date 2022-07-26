@@ -55,17 +55,6 @@ class Topic extends Model
     ];
 
     /**
-     * Relations will be cached with the entity
-     *
-     * @var array<string>
-     */
-    public array $cacheRelations = [
-        'clerk:id,name',
-        'category:id,name',
-        'tags:id,name',
-    ];
-
-    /**
      * Perform any actions required after the model boots.
      *
      * @return void
@@ -73,13 +62,13 @@ class Topic extends Model
     protected static function booted()
     {
         static::saved(queueable(function ($topic){
-            $topic->indexCache('published_at' , 'desc' , $topic->cacheRelations , false);
-            $topic->cache($topic->cacheRelations);
+            $topic->indexCache('published_at' , 'desc' , false);
+            $topic->cache();
         }));
 
         static::deleted(queueable(function ($topic){
             $topic->drppCache();
-            $topic->indexCache('published_at' , 'desc' , $topic->cacheRelations , false);
+            $topic->indexCache('published_at' , 'desc' , false);
         }));
     }
 
@@ -102,7 +91,7 @@ class Topic extends Model
      */
     public function index(): \Illuminate\Pagination\LengthAwarePaginator
     {
-        return $this->getFromCache('published_at' , 'desc' , $this->cacheRelations , false);
+        return $this->getFromCache('published_at' , 'desc' , false);
     }
 
     /**

@@ -37,16 +37,6 @@ class Category extends Model
 //    ];
 
     /**
-     * Relations will be cached with the entity
-     *
-     * @var array|string[]
-     */
-    public array $cacheRelations = [
-        'parent:id,name',
-        'children:id,name',
-    ];
-
-    /**
      * Perform any actions required after the model boots.
      *
      * @return void
@@ -54,7 +44,7 @@ class Category extends Model
     protected static function booted()
     {
         static::saved(queueable(function ($category){
-            $category->cache($category->cacheRelations);
+            $category->cache();
             $category->indexCache();
         }));
 
@@ -83,8 +73,11 @@ class Category extends Model
     public function resolveRouteBinding($value, $field = null): ?Model
     {
         $category =  $this->findFromCache($value);
-        // only if getting
-        $category->relatedTopics = Cache::get('topics')->where('category_id' , $value);
+        if (request()->method() == 'GET'){
+            // parent
+            // children
+            $category->relatedTopics = Cache::get('topics' , collect())->where('category_id' , $value);
+        }
         return $category;
     }
 
@@ -93,7 +86,7 @@ class Category extends Model
      *
      * @return \Illuminate\Pagination\LengthAwarePaginator
      */
-    public function index(): \Illuminate\Pagination\LengthAwarePaginator
+    public function scopeIndex(): \Illuminate\Pagination\LengthAwarePaginator
     {
         return $this->getFromCache();
     }

@@ -33,13 +33,6 @@ class Tag extends Model
 //    ];
 
     /**
-     * Relations will be cached with the entity
-     *
-     * @var array<string>
-     */
-    public array $cacheRelations = [];
-
-    /**
      * Perform any actions required after the model boots.
      *
      * @return void
@@ -48,8 +41,7 @@ class Tag extends Model
     {
         static::saved(queueable(function ($tag){
             $tag->indexCache();
-            $tag->cache($tag->cacheRelations);
-//            $tag->topics()->cache();
+            $tag->cache();
         }));
 
         static::deleted(queueable(function ($tag){

@@ -17,9 +17,7 @@ class ShowController extends Controller
      */
     public function index(): \Illuminate\Http\JsonResponse
     {
-        $categories = Cache::rememberForever('tags' , function (){
-            Category::withCount('topics')->orderBy('topics_count' , 'desc')->paginate(25);
-        });
+        $categories = Category::index();
 
         return response()->json($categories , 200);
     }

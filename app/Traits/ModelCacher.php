@@ -13,9 +13,9 @@ trait ModelCacher{
      *
      * @return void
      */
-    public function cache(array $relations)
+    public function cache()
     {
-        Cache::put(strtolower(class_basename(static::class)) . '_' . $this->id , $this->load($this->cacheRelations));
+        Cache::put(strtolower(class_basename(static::class)) . '_' . $this->id , $this);
     }
 
     /**
@@ -23,9 +23,9 @@ trait ModelCacher{
      *
      * @return void
      */
-    public function indexCache(string $orderBy = 'topics_count' , string $orderDir = 'desc' , array|null $relations = null , bool $withCountTopics = true)
+    public function indexCache(string $orderBy = 'topics_count' , string $orderDir = 'desc' , bool $withCountTopics = true)
     {
-        Cache::put(Str::plural(strtolower(class_basename(static::class))) , $this->indexCacheQuery($orderBy , $orderDir , $relations , $withCountTopics));
+        Cache::put(Str::plural(strtolower(class_basename(static::class))) , $this->indexCacheQuery($orderBy , $orderDir , $withCountTopics));
     }
 
     /**
@@ -47,7 +47,7 @@ trait ModelCacher{
     public function findFromCache(int $value): ?\Illuminate\Database\Eloquent\Model
     {
         return  Cache::rememberForever(strtolower(class_basename(static::class)) . '_' .$value , function () use ($value){
-            return $this->with($this->cacheRelations)->findOrFail($value);
+            return $this->findOrFail($value);
         });
     }
 
@@ -56,14 +56,13 @@ trait ModelCacher{
      *
      * @param string $orderBy
      * @param string $orderDir
-     * @param array|null $relations
      * @param bool $withCountTopics
      * @return \Illuminate\Pagination\LengthAwarePaginator
      */
-    public function getFromCache(string $orderBy = 'topics_count' , string $orderDir = 'desc' , array|null $relations = null , bool $withCountTopics = true): \Illuminate\Pagination\LengthAwarePaginator
+    public function getFromCache(string $orderBy = 'topics_count' , string $orderDir = 'desc' , bool $withCountTopics = true): \Illuminate\Pagination\LengthAwarePaginator
     {
-        return Cache::rememberForever(Str::plural(strtolower(class_basename(static::class))) , function () use ($orderBy , $orderDir , $relations , $withCountTopics){
-            $this->indexCacheQuery($orderBy , $orderDir , $relations , $withCountTopics);
+        return Cache::rememberForever(Str::plural(strtolower(class_basename(static::class))) , function () use ($orderBy , $orderDir , $withCountTopics){
+            $this->indexCacheQuery($orderBy , $orderDir , $withCountTopics);
         });
     }
 
@@ -72,14 +71,12 @@ trait ModelCacher{
      *
      * @param string $orderBy
      * @param string $orderDir
-     * @param array|null $relations
      * @param bool $withCountTopics
      * @return \Illuminate\Pagination\LengthAwarePaginator
      */
-    private function indexCacheQuery(string $orderBy, string $orderDir, array|null $relations, bool $withCountTopics): \Illuminate\Pagination\LengthAwarePaginator
+    private function indexCacheQuery(string $orderBy, string $orderDir, bool $withCountTopics): \Illuminate\Pagination\LengthAwarePaginator
     {
         $query = $this->orderBy($orderBy , $orderDir);
-        $query = $relations ? $query->with($relations) : $query;
         $query = $withCountTopics ? $query->withCount(['topics' => function (Builder $query){
             $query->where('published' , true);
         }]) : $query;

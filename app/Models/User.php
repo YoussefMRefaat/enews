@@ -52,13 +52,6 @@ class User extends Authenticatable
     ];
 
     /**
-     * Relations will be cached with the entity
-     *
-     * @var array|string[]
-     */
-    public array $cacheRelations = [];
-
-    /**
      * Perform any actions required after the model boots.
      *
      * @return void
@@ -66,9 +59,8 @@ class User extends Authenticatable
     protected static function booted()
     {
         static::saved(queueable(function ($clerk){
-            $clerk->cache($clerk->cacheRelations);
+            $clerk->cache();
             $clerk->indexCache();
-//            $clerk->topics()->cache();
         }));
 
         static::deleting(queueable(function ($clerk){
