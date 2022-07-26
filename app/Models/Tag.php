@@ -61,12 +61,9 @@ class Tag extends Model
     public function resolveRouteBinding($value, $field = null): ?Model
     {
         $tag = $this->findFromCache($value);
-        // only if get - not update
-        $tag->relatedTopics = Cache::get('topics')->filter(function ($value , $key) use ($tag){
-            return array_filter($value->tags->toArray() , function ($val) use ($tag){
-                return $tag->id == $val['id'];
-            });
-        });
+        if (request()->method() == 'GET'){
+            $tag->load('topics');
+        }
         return $tag;
     }
 

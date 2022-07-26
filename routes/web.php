@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Topic;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,5 +15,6 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    dd(\Illuminate\Support\Facades\Cache::get('category_4'));
+    $topic = \Illuminate\Support\Facades\Cache::get('users');
+    dd($topic);
 });

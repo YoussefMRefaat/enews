@@ -31,17 +31,6 @@ class User extends Authenticatable
     ];
 
     /**
-     * Columns that are available for public
-     *
-     * @var array
-     */
-//    public array $publicColumns = [
-//        'name',
-//        'email',
-//        'topics',
-//    ];
-
-    /**
      * The attributes that should be hidden for serialization.
      *
      * @var array<int, string>
@@ -82,15 +71,19 @@ class User extends Authenticatable
      */
     public function resolveRouteBinding($value, $field = null): ?Model
     {
-        return $this->findFromCache($value);
+        $user = $this->findFromCache($value);
+        if (request()->method() == 'GET'){
+            $user->relatedTopics = Topic::index()->where('clerk_id' , $value);
+        }
+        return $user;
     }
 
     /**
      * Get models from the cache.
      *
-     * @return \Illuminate\Pagination\LengthAwarePaginator
+     * @return \Illuminate\Pagination\LengthAwarePaginator|null
      */
-    public function index(): \Illuminate\Pagination\LengthAwarePaginator
+    public function scopeIndex(): ?\Illuminate\Pagination\LengthAwarePaginator
     {
         return $this->getFromCache();
     }

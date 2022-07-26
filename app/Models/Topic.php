@@ -81,7 +81,13 @@ class Topic extends Model
      */
     public function resolveRouteBinding($value, $field = null): ?Model
     {
-        return $this->findFromCache($value);
+        $topic = $this->findFromCache($value);
+        if (request()->method() == 'GET'){
+            $topic->clerk = User::index()->find($topic->clerk_id);
+            $topic->category = Category::index()->find($topic->category_id);
+            $topic->load('tags');
+        }
+        return $topic;
     }
 
     /**
@@ -89,7 +95,7 @@ class Topic extends Model
      *
      * @return \Illuminate\Pagination\LengthAwarePaginator
      */
-    public function index(): \Illuminate\Pagination\LengthAwarePaginator
+    public function scopeIndex(): \Illuminate\Pagination\LengthAwarePaginator
     {
         return $this->getFromCache('published_at' , 'desc' , false);
     }

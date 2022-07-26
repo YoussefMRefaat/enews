@@ -17,11 +17,7 @@ class ShowController extends Controller
      */
     public function index(): \Illuminate\Http\JsonResponse
     {
-        $users = Cache::rememberForever('users' , function (){
-            User::withCount('topics')
-                ->orderBy('topics_count' , 'desc')
-                ->paginate(25);
-        });
+        $users = User::index();
 
         return response()->json($users , 200);
     }

@@ -74,9 +74,9 @@ class Category extends Model
     {
         $category =  $this->findFromCache($value);
         if (request()->method() == 'GET'){
-            // parent
-            // children
-            $category->relatedTopics = Cache::get('topics' , collect())->where('category_id' , $value);
+            $category->parent = Category::index()->find($category->parent_id);
+            $category->children = Category::index()->where('parent_id' , $value);
+            $category->relatedTopics = Topic::index()->where('category_id' , $value);
         }
         return $category;
     }

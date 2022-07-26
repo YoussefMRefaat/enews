@@ -46,9 +46,9 @@ trait ModelCacher{
      */
     public function findFromCache(int $value): ?\Illuminate\Database\Eloquent\Model
     {
-        return  Cache::rememberForever(strtolower(class_basename(static::class)) . '_' .$value , function () use ($value){
-            return $this->findOrFail($value);
-        });
+        return  Cache::rememberForever(strtolower(class_basename(static::class)) . '_' . $value ,
+            fn() => $this->findOrFail($value)
+        );
     }
 
     /**
@@ -62,7 +62,7 @@ trait ModelCacher{
     public function getFromCache(string $orderBy = 'topics_count' , string $orderDir = 'desc' , bool $withCountTopics = true): \Illuminate\Pagination\LengthAwarePaginator
     {
         return Cache::rememberForever(Str::plural(strtolower(class_basename(static::class))) , function () use ($orderBy , $orderDir , $withCountTopics){
-            $this->indexCacheQuery($orderBy , $orderDir , $withCountTopics);
+            return $this->indexCacheQuery($orderBy , $orderDir , $withCountTopics);
         });
     }
 
