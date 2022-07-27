@@ -13,7 +13,7 @@ trait ModelCacher{
      *
      * @return void
      */
-    public function cache(?string $manyToManyRelation)
+    public function cache(?string $manyToManyRelation = null)
     {
         Cache::put(strtolower(class_basename(static::class)) . '_' . $this->id , $manyToManyRelation ? $this->load($manyToManyRelation . ':id') : $this);
     }

@@ -27,7 +27,7 @@ class UpdateRequest extends FormRequest
     {
         return [
             'name' => ['string' , 'nullable'],
-            'email' => ['email' , 'unique:users'],
+            'email' => ['email' , 'unique:users,email,' . $this->user->id],
             'roles' => ['array' , 'min:1'],
             'roles.*' => [Rule::In(Roles::valuesOf(['moderator' , 'writer' , 'journalist']))],
         ];

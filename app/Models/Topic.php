@@ -29,22 +29,6 @@ class Topic extends Model
     ];
 
     /**
-     * Columns that are available for public
-     *
-     * @var array
-     */
-//    public array $publicColumns = [
-//        'name',
-//        'type',
-//        'title',
-//        'body',
-//        'published_at',
-//        'clerk',
-//        'category',
-//        'tags',
-//    ];
-
-    /**
      * The attributes that should be cast.
      *
      * @var array<string, string>
@@ -100,7 +84,32 @@ class Topic extends Model
      */
     public function scopeIndex(): \Illuminate\Pagination\LengthAwarePaginator
     {
-        return $this->getFromCache('published_at' , 'desc' , false);
+        $topics = $this->getFromCache('published_at' , 'desc' , false);
+        // load related data from cache
+        $topics->each(function ($topic){
+            $topic->category = Category::index()->where('id' , $topic->category_id);
+            $topic->clerk = User::index()->where('id' , $topic->clerk_id);
+        });
+        return $topics;
+    }
+
+    /**
+     * Get public models from the cache.
+     *
+     * @return \Illuminate\Pagination\LengthAwarePaginator
+     */
+    public function scopePublicNewsIndex()//: \Illuminate\Pagination\LengthAwarePaginator
+    { // not tested
+        $topics = $this->getFromCache('published_at' , 'desc' , false)
+//            ->where('type' , TopicType::News)->where('published' , true)
+        // How to use where queries on paginator ?
+        ;
+        // load related data from cache
+        $topics->each(function ($topic){
+            $topic->category = Category::index()->where('id' , $topic->category_id);
+            $topic->clerk = User::index()->where('id' , $topic->clerk_id);
+        })->filter(fn($topic) => $topic->category[0]->enabled);
+        return $topics;
     }
 
     /**
