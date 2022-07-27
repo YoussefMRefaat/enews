@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Topic;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,6 +16,5 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    $topic = \Illuminate\Support\Facades\Cache::get('users');
-    dd($topic);
+    \Illuminate\Support\Facades\Cache::forget('tags');
 });

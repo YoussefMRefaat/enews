@@ -63,7 +63,7 @@ class Topic extends Model
     {
         static::saved(queueable(function ($topic){
             $topic->indexCache('published_at' , 'desc' , false);
-            $topic->cache();
+            $topic->cache('tags');
         }));
 
         static::deleted(queueable(function ($topic){
@@ -81,11 +81,14 @@ class Topic extends Model
      */
     public function resolveRouteBinding($value, $field = null): ?Model
     {
-        $topic = $this->findFromCache($value);
+        $topic = $this->findFromCache($value , 'tags');
+        // Get related data from cache
         if (request()->method() == 'GET'){
             $topic->clerk = User::index()->find($topic->clerk_id);
             $topic->category = Category::index()->find($topic->category_id);
-            $topic->load('tags');
+            $tags = $topic->tags;
+            unset($topic->tags);
+            $topic->tags = Tag::index()->whereIn('id' , $tags->pluck('id')->toArray());
         }
         return $topic;
     }

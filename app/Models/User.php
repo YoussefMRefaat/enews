@@ -72,6 +72,7 @@ class User extends Authenticatable
     public function resolveRouteBinding($value, $field = null): ?Model
     {
         $user = $this->findFromCache($value);
+        // Get related data from cache
         if (request()->method() == 'GET'){
             $user->relatedTopics = Topic::index()->where('clerk_id' , $value);
         }

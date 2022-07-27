@@ -17,9 +17,7 @@ class ShowController extends Controller
      */
     public function index(): \Illuminate\Http\JsonResponse
     {
-        $tags = Cache::rememberForever('tags' , function (){
-            Tag::withCount('topics')->orderBy('topics_count' , 'desc')->paginate(25);
-        });
+        $tags = Tag::index();
 
         return response()->json($tags, 200);
     }

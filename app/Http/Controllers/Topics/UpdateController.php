@@ -23,6 +23,11 @@ class UpdateController extends Controller
         if (!auth()->user()->publisher)
             $data['published'] = false;
 
+        if (isset($data['tags'])){
+            $topic->tags()->detach();
+            $topic->tags()->attach($data['tags']);
+        }
+
         $topic->update($request->validated());
 
         return response()->json(status: 204);

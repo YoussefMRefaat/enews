@@ -13,9 +13,9 @@ trait ModelCacher{
      *
      * @return void
      */
-    public function cache()
+    public function cache(?string $manyToManyRelation)
     {
-        Cache::put(strtolower(class_basename(static::class)) . '_' . $this->id , $this);
+        Cache::put(strtolower(class_basename(static::class)) . '_' . $this->id , $manyToManyRelation ? $this->load($manyToManyRelation . ':id') : $this);
     }
 
     /**
@@ -42,12 +42,13 @@ trait ModelCacher{
      * Find an entity from the cache
      *
      * @param int $value
+     * @param string|null $manyToManyRelation
      * @return \Illuminate\Database\Eloquent\Model|null
      */
-    public function findFromCache(int $value): ?\Illuminate\Database\Eloquent\Model
+    public function findFromCache(int $value, ?string $manyToManyRelation = null): ?\Illuminate\Database\Eloquent\Model
     {
         return  Cache::rememberForever(strtolower(class_basename(static::class)) . '_' . $value ,
-            fn() => $this->findOrFail($value)
+            fn() => $manyToManyRelation ? $this->with($manyToManyRelation . ':id')->findOrFail($value) : $this->findOrFail($value)
         );
     }
 

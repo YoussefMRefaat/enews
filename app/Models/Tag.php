@@ -41,13 +41,12 @@ class Tag extends Model
     {
         static::saved(queueable(function ($tag){
             $tag->indexCache();
-            $tag->cache();
+            $tag->cache('topics');
         }));
 
         static::deleted(queueable(function ($tag){
             $tag->dropCache();
             $tag->indexCache();
-//            $tag->topics()->cache();
         }));
     }
 
@@ -60,9 +59,12 @@ class Tag extends Model
      */
     public function resolveRouteBinding($value, $field = null): ?Model
     {
-        $tag = $this->findFromCache($value);
+        $tag = $this->findFromCache($value , 'topics');
+        // Get related data from cache
         if (request()->method() == 'GET'){
-            $tag->load('topics');
+            $topics = $tag->topics;
+            unset($tag->topics);
+            $tag->topics = Topic::index()->whereIn('id' , $topics->pluck('id')->toArray());
         }
         return $tag;
     }
@@ -72,7 +74,7 @@ class Tag extends Model
      *
      * @return \Illuminate\Pagination\LengthAwarePaginator
      */
-    public function index(): \Illuminate\Pagination\LengthAwarePaginator
+    public function scopeIndex(): \Illuminate\Pagination\LengthAwarePaginator
     {
         return $this->getFromCache();
     }
