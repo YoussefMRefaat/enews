@@ -62,9 +62,9 @@ trait ModelCacher{
      */
     public function getFromCache(string $orderBy = 'topics_count' , string $orderDir = 'desc' , bool $withCountTopics = true): \Illuminate\Pagination\LengthAwarePaginator
     {
-        return Cache::rememberForever(Str::plural(strtolower(class_basename(static::class))) , function () use ($orderBy , $orderDir , $withCountTopics){
-            return $this->indexCacheQuery($orderBy , $orderDir , $withCountTopics);
-        });
+        return Cache::rememberForever(Str::plural(strtolower(class_basename(static::class))) ,
+            fn() => $this->indexCacheQuery($orderBy , $orderDir , $withCountTopics)
+        );
     }
 
     /**
