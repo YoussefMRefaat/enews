@@ -14,6 +14,18 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::get('/public/topics' , [\App\Http\Controllers\Topics\ShowController::class , 'publicIndex']);
+Route::get('/public/clerks' , [\App\Http\Controllers\Clerks\ShowController::class , 'publicIndex']);
+Route::get('/public/categories' , [\App\Http\Controllers\Categories\ShowController::class , 'publicIndex']);
+Route::get('/public/tags' , [\App\Http\Controllers\Tags\ShowController::class , 'publicIndex']);
+
+//Route::get('/public/{topic}');
+//Route::get('/public/{clerk}');
+//Route::get('/public/{category}');
+//Route::get('/public/{tag}');
+//
+//Route::post('subscribe');
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });

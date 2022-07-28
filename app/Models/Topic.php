@@ -78,7 +78,7 @@ class Topic extends Model
     }
 
     /**
-     * Get models from the cache.
+     * Get entities from the cache.
      *
      * @return \Illuminate\Pagination\LengthAwarePaginator
      */
@@ -94,22 +94,23 @@ class Topic extends Model
     }
 
     /**
-     * Get public models from the cache.
+     * Get public entities from the cache.
      *
-     * @return \Illuminate\Pagination\LengthAwarePaginator
+     * @param TopicType $type
+     * @return \Illuminate\Support\HigherOrderCollectionProxy
      */
-    public function scopePublicNewsIndex()//: \Illuminate\Pagination\LengthAwarePaginator
-    { // not tested
+    public function scopePublicIndex(TopicType $type): \Illuminate\Support\HigherOrderCollectionProxy
+    {
         $topics = $this->getFromCache('published_at' , 'desc' , false)
-//            ->where('type' , TopicType::News)->where('published' , true)
-        // How to use where queries on paginator ?
-        ;
+            ->where('type' , $type)->where('published' , true);
         // load related data from cache
         $topics->each(function ($topic){
-            $topic->category = Category::index()->where('id' , $topic->category_id);
-            $topic->clerk = User::index()->where('id' , $topic->clerk_id);
-        })->filter(fn($topic) => $topic->category[0]->enabled);
-        return $topics;
+            $topic->category = Category::index()->find($topic->category_id)->only(['id' , 'name']);
+            $topic->clerk = User::index()->find($topic->clerk_id)->only(['id' , 'name']);
+        });
+
+        return $topics->where('category.enabled' , true)
+            ->map->only(['title' , 'body' , 'created_at' , 'category' , 'clerk']);
     }
 
     /**

@@ -83,7 +83,7 @@ class Category extends Model
     }
 
     /**
-     * Get models from the cache.
+     * Get entities from the cache.
      *
      * @return \Illuminate\Pagination\LengthAwarePaginator
      */
@@ -91,6 +91,18 @@ class Category extends Model
     {
         return $this->getFromCache();
     }
+
+    /**
+     * Get public entities from the cache.
+     *
+     * @return Collection
+     */
+    public function scopePublicIndex(): \Illuminate\Support\Collection
+    {
+        return $this->getFromCache()->where('enabled' , true)
+            ->map->only(['id' , 'name' , 'parent_id' , 'topics_count']);
+    }
+
 
     /**
      * Set the relationship between the category and its parent category

@@ -23,6 +23,18 @@ class ShowController extends Controller
     }
 
     /**
+     * Get public users
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function publicIndex(): \Illuminate\Http\JsonResponse
+    {
+        $users = User::publicIndex();
+
+        return response()->json($users , 200);
+    }
+
+    /**
      * Show a specific user
      *
      * @param User $user

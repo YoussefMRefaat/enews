@@ -22,6 +22,17 @@ class ShowController extends Controller
         return response()->json($topics , 200);
     }
 
+    /**
+     * Get public topics
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function publicIndex(): \Illuminate\Http\JsonResponse
+    {
+        $topics = Topic::publicIndex();
+
+        return response()->json($topics , 200);
+    }
 
     /**
      * Show a topic

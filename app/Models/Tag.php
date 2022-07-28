@@ -80,6 +80,17 @@ class Tag extends Model
     }
 
     /**
+     * Get public entities from the cache.
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public function scopePublicIndex(): \Illuminate\Support\Collection
+    {
+        return $this->getFromCache()->where('enabled' , true)
+            ->map->only(['id' , 'name' , 'topics_count']);
+    }
+
+    /**
      * Set the relationship between the tag and its topics
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany

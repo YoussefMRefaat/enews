@@ -17,5 +17,5 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    dd(Topic::publicNewsIndex());
+    dd(\App\Models\User::publicIndex());
 });

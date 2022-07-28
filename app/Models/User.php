@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Roles;
 use App\Traits\ModelCacher;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -80,13 +81,28 @@ class User extends Authenticatable
     }
 
     /**
-     * Get models from the cache.
+     * Get entities from the cache.
      *
-     * @return \Illuminate\Pagination\LengthAwarePaginator|null
+     * @return \Illuminate\Pagination\LengthAwarePaginator
      */
-    public function scopeIndex(): ?\Illuminate\Pagination\LengthAwarePaginator
+    public function scopeIndex(): \Illuminate\Pagination\LengthAwarePaginator
     {
         return $this->getFromCache();
+    }
+
+    /**
+     * Get public entities from the cache.
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public function scopePublicIndex(): \Illuminate\Support\Collection
+    {
+        $users =  $this->getFromCache()->where('banned' , false)
+            ->where('topics_count' , '>' , 0)->filter(function ($value){
+                return array_intersect($value->roles , [Roles::Journalist->value , Roles::Writer->value]);
+            });
+
+        return $users->map->only(['id' , 'name' , 'topics_count' ,'roles']);
     }
 
     /**

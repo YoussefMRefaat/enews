@@ -22,6 +22,17 @@ class ShowController extends Controller
         return response()->json($categories , 200);
     }
 
+    /**
+     * Get public categories
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function publicIndex(): \Illuminate\Http\JsonResponse
+    {
+        $categories = Category::publicIndex();
+
+        return response()->json($categories , 200);
+    }
 
     /**
      * Show a category

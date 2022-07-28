@@ -22,6 +22,17 @@ class ShowController extends Controller
         return response()->json($tags, 200);
     }
 
+    /**
+     * Get public tags
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function publicIndex(): \Illuminate\Http\JsonResponse
+    {
+        $tags = Tag::publicIndex();
+
+        return response()->json($tags, 200);
+    }
 
     /**
      * Show a tag
