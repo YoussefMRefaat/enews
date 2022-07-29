@@ -26,17 +26,6 @@ class Category extends Model
     ];
 
     /**
-     * Columns that are available for public
-     *
-     * @var array
-     */
-//    public array $publicColumns = [
-//        'name',
-//        'parent_id',
-//        'topics',
-//    ];
-
-    /**
      * Perform any actions required after the model boots.
      *
      * @return void
@@ -68,18 +57,48 @@ class Category extends Model
      *
      * @param  mixed  $value
      * @param  string|null  $field
-     * @return \Illuminate\Database\Eloquent\Model|null
+     * @return Model|array
      */
-    public function resolveRouteBinding($value, $field = null): ?Model
+    public function resolveRouteBinding($value, $field = null): Model|array
     {
         $category =  $this->findFromCache($value);
+        // if route is public -> find public || if route is dashboard -> find dashboard
+
+        return $this->findPublic($category);
+    }
+
+    protected function findDashboard($category): ?Model
+    {
         // Get related data from cache
         if (request()->method() == 'GET'){
             $category->parent = Category::index()->find($category->parent_id);
-            $category->children = Category::index()->where('parent_id' , $value);
-            $category->topics = Topic::index()->where('category_id' , $value);
+            $category->children = Category::index()->where('parent_id' , $category->id);
+            $category->topics = Topic::index()->where('category_id' , $category->id);
+            $category->topics->each(function ($topic){
+                $topic->clerk = User::index()->find($topic->clerk_id);
+            });
         }
         return $category;
+    }
+
+    protected function findPublic($category)
+    {
+        if (!$category->enabled) abort(404);
+        // Get related data from cache
+        if (request()->method() == 'GET'){
+            $category->parent = Category::index()->where('id' , $category->parent_id)
+                ->map->only(['id' , 'name' , 'topics_count']);
+            $category->children = Category::index()->where('parent_id' , $category->id)
+                ->where('enabled' , true)
+                ->map->only(['id' , 'name' , 'topics_count']);
+            $category->topics = Topic::index()->where('category_id' , $category->id)
+                ->where('published' , true);
+            $category->topics->each(function ($topic){
+                $topic->clerk = User::index()->find($topic->clerk_id)->only(['id' , 'name']);
+            });
+            $category->topics = $category->topics->map->only(['id' , 'title' , 'body' ,'created_at' , 'clerk']);
+        }
+        return $category;//->only(['id' , 'name' , 'parent' , 'children' , 'topics']);
     }
 
     /**

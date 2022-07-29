@@ -17,5 +17,5 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    dd(\App\Models\User::publicIndex());
+    dd(Cache::get('category_4'));
 });
