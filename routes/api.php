@@ -14,14 +14,15 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/topics' , [\App\Http\Controllers\Topics\ShowController::class , 'publicIndex']);
+Route::get('/news' , [\App\Http\Controllers\Topics\ShowController::class , 'news']);
+Route::get('/articles' , [\App\Http\Controllers\Topics\ShowController::class , 'articles']);
 Route::get('/clerks' , [\App\Http\Controllers\Clerks\ShowController::class , 'publicIndex']);
 Route::get('/categories' , [\App\Http\Controllers\Categories\ShowController::class , 'publicIndex']);
 Route::get('/tags' , [\App\Http\Controllers\Tags\ShowController::class , 'publicIndex']);
 
 //Route::get('/{topic}');
-//Route::get('/{clerk}');
-//Route::get('/{category}');
+Route::get('/clerks/{user}' , [\App\Http\Controllers\Clerks\ShowController::class , 'show']);
+Route::get('/categories/{category}' , [\App\Http\Controllers\Categories\ShowController::class , 'show']);
 //Route::get('/{tag}');
 //
 //Route::post('subscribe');

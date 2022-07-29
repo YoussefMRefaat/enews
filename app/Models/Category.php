@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\TopicType;
 use App\Traits\ModelCacher;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -62,11 +63,19 @@ class Category extends Model
     public function resolveRouteBinding($value, $field = null): Model|array
     {
         $category =  $this->findFromCache($value);
-        // if route is public -> find public || if route is dashboard -> find dashboard
+        abort_if(!$category->enabled , 404);
 
-        return $this->findPublic($category);
+        return request()->segment(2) == 'dashboard'
+            ? $this->findDashboard($category)
+            : $this->findPublic($category);
     }
 
+    /**
+     * Retrieve the model for the dashboard
+     *
+     * @param $category
+     * @return Model|null
+     */
     protected function findDashboard($category): ?Model
     {
         // Get related data from cache
@@ -81,24 +90,23 @@ class Category extends Model
         return $category;
     }
 
-    protected function findPublic($category)
+    /**
+     * Retrieve the model for the public
+     *
+     * @param $category
+     * @return Model|null
+     */
+    protected function findPublic($category): ?Model
     {
         if (!$category->enabled) abort(404);
         // Get related data from cache
         if (request()->method() == 'GET'){
-            $category->parent = Category::index()->where('id' , $category->parent_id)
-                ->map->only(['id' , 'name' , 'topics_count']);
-            $category->children = Category::index()->where('parent_id' , $category->id)
-                ->where('enabled' , true)
-                ->map->only(['id' , 'name' , 'topics_count']);
-            $category->topics = Topic::index()->where('category_id' , $category->id)
-                ->where('published' , true);
-            $category->topics->each(function ($topic){
-                $topic->clerk = User::index()->find($topic->clerk_id)->only(['id' , 'name']);
-            });
-            $category->topics = $category->topics->map->only(['id' , 'title' , 'body' ,'created_at' , 'clerk']);
+            $category->parent = Category::publicIndex()->where('id' , $category->parent_id);
+            $category->children = Category::publicIndex()->where('parent_id' , $category->id);
+            $category->news = Topic::publicNews()->where('category.id' , $category->id);
+            $category->articles = Topic::publicArticles()->where('category.id' , $category->id);
         }
-        return $category;//->only(['id' , 'name' , 'parent' , 'children' , 'topics']);
+        return $category->setVisible(['id' , 'name' , 'parent' , 'children' , 'news' , 'articles']);
     }
 
     /**

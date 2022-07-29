@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\TopicType;
 use App\Traits\ModelCacher;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -60,13 +61,41 @@ class Tag extends Model
     public function resolveRouteBinding($value, $field = null): ?Model
     {
         $tag = $this->findFromCache($value , 'topics');
+        return request()->segment(2) == 'dashboard'
+            ? $this->findDashboard($tag)
+            : $this->findPublic($tag);
+    }
+
+    /**
+     * Retrieve the model for the dashboard
+     *
+     * @param $tag
+     * @return Model|null
+     */
+    protected function findDashboard($tag): ?Model
+    {
         // Get related data from cache
         if (request()->method() == 'GET'){
-            $topics = $tag->topics;
-            unset($tag->topics);
-            $tag->topics = Topic::index()->whereIn('id' , $topics->pluck('id')->toArray());
         }
         return $tag;
+    }
+
+    /**
+     * Retrieve the model for the public
+     *
+     * @param $category
+     * @return Model|null
+     */
+    protected function findPublic($tag): ?Model
+    {
+        if (!$tag->enabled) abort(404);
+        // Get related data from cache
+        if (request()->method() == 'GET'){
+            $tag->news = Topic::publicIndex(TopicType::News)->filter(function ($topic) use ($tag){
+                return in_array($tag->id , $topic->tags->pluck('id')->toArray());
+            });
+        }
+        return $category->setVisible(['id' , 'name' , 'parent' , 'children' , 'topics']);
     }
 
     /**

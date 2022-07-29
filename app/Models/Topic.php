@@ -96,21 +96,45 @@ class Topic extends Model
     /**
      * Get public entities from the cache.
      *
-     * @param TopicType $type
-     * @return \Illuminate\Support\HigherOrderCollectionProxy
+     * @return mixed
      */
-    public function scopePublicIndex(TopicType $type): \Illuminate\Support\HigherOrderCollectionProxy
+    public function scopePublicNews(): mixed
     {
         $topics = $this->getFromCache('published_at' , 'desc' , false)
-            ->where('type' , $type)->where('published' , true);
+            ->where('type' , TopicType::News)->where('published' , true)
+        ;
         // load related data from cache
+        return $this->publicIndexRelations($topics);
+    }
+
+    /**
+     * Get public entities from the cache.
+     *
+     * @return mixed
+     */
+    public function scopePublicArticles(): mixed
+    {
+        $topics = $this->getFromCache('published_at' , 'desc' , false)
+            ->where('type' , TopicType::Article)->where('published' , true);
+        // load related data from cache
+        return $this->publicIndexRelations($topics);
+
+    }
+
+    /**
+     * Get relation for public index
+     *
+     * @param $topics
+     * @return mixed
+     */
+    private function publicIndexRelations($topics): mixed
+    {
         $topics->each(function ($topic){
             $topic->category = Category::index()->find($topic->category_id)->only(['id' , 'name']);
             $topic->clerk = User::index()->find($topic->clerk_id)->only(['id' , 'name']);
         });
 
-        return $topics->where('category.enabled' , true)
-            ->map->only(['title' , 'body' , 'created_at' , 'category' , 'clerk']);
+        return $topics->map->only(['title' , 'body' , 'created_at' , 'category' , 'clerk']);
     }
 
     /**

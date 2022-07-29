@@ -73,11 +73,42 @@ class User extends Authenticatable
     public function resolveRouteBinding($value, $field = null): ?Model
     {
         $user = $this->findFromCache($value);
+
+        return request()->segment(2) == 'dashboard'
+            ? $this->findDashboard($user)
+            : $this->findPublic($user);
+    }
+
+    /**
+     * Retrieve the model for the dashboard
+     *
+     * @param $user
+     * @return Model|null
+     */
+    protected function findDashboard($user): ?Model
+    {
         // Get related data from cache
         if (request()->method() == 'GET'){
-            $user->relatedTopics = Topic::index()->where('clerk_id' , $value);
+            $user->topics = Topic::index()->where('clerk_id' , $user->id);
         }
         return $user;
+    }
+
+    /**
+     * Retrieve the model for the public
+     *
+     * @param $user
+     * @return Model|null
+     */
+    protected function findPublic($user): ?Model
+    {
+        abort_if(!array_intersect($user->roles, [Roles::Journalist->value, Roles::Writer->value]), 404);
+         // Get related data from cache
+        if (request()->method() == 'GET'){
+            $user->news = Topic::publicNews()->where('clerk.id' , $user->id);
+            $user->articles = Topic::publicArticles()->where('clerk.id' , $user->id);
+        }
+        return $user->setVisible(['id' , 'name' , 'news' , 'articles']);
     }
 
     /**
@@ -97,12 +128,11 @@ class User extends Authenticatable
      */
     public function scopePublicIndex(): \Illuminate\Support\Collection
     {
-        $users =  $this->getFromCache()->where('banned' , false)
-            ->where('topics_count' , '>' , 0)->filter(function ($value){
+        $users =  $this->getFromCache()->where('banned' , false)->filter(function ($value){
                 return array_intersect($value->roles , [Roles::Journalist->value , Roles::Writer->value]);
             });
 
-        return $users->map->only(['id' , 'name' , 'topics_count' ,'roles']);
+        return $users->map->only(['id' , 'name' , 'topics_count']);
     }
 
     /**

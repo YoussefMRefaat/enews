@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Topics;
 
+use App\Enums\TopicType;
 use App\Http\Controllers\Controller;
 use App\Models\Topic;
 use Illuminate\Http\Request;
@@ -23,13 +24,25 @@ class ShowController extends Controller
     }
 
     /**
-     * Get public topics
+     * Get published news
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function publicIndex(): \Illuminate\Http\JsonResponse
+    public function news(): \Illuminate\Http\JsonResponse
     {
-        $topics = Topic::publicIndex();
+        $topics = Topic::publicNews();
+
+        return response()->json($topics , 200);
+    }
+
+    /**
+     * Get published articles
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function articles(): \Illuminate\Http\JsonResponse
+    {
+        $topics = Topic::publicArticles();
 
         return response()->json($topics , 200);
     }

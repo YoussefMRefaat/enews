@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\TopicType;
 use App\Models\Topic;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
@@ -17,5 +18,6 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    dd(Cache::get('category_4'));
+//    dd(dd(Topic::publicNews() , Topic::publicArticles()));
+    dd(Cache::get('users'));
 });
