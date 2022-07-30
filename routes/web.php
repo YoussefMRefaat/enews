@@ -16,8 +16,3 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
-
-Route::get('/', function () {
-//    dd(dd(Topic::publicNews() , Topic::publicArticles()));
-    dd(\App\Models\Tag::publicIndex());
-});
