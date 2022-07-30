@@ -2,7 +2,7 @@
 
 ## Idea
 
-RESTful API for news website <br>
+RESTful API serves a news application <br>
 Built using ***Laravel*** | ***MySQL*** | ***Redis***
 
 
