@@ -92,7 +92,8 @@ class Tag extends Model
      */
     protected function findPublic($tag): ?Model
     {
-        if (!$tag->enabled) abort(404);// Get related data from cache
+        if (!$tag->enabled) abort(404);
+        // Get related data from cache
         if (request()->method() == 'GET'){
             $tag->news = Topic::publicNews()->filter(function ($topic) use ($tag){
                 return in_array($tag->id , $topic['relatedTags']->pluck('id')->toArray());
