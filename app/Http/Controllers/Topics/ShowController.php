@@ -28,7 +28,7 @@ class ShowController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function news(): \Illuminate\Http\JsonResponse
+    public function publicNews(): \Illuminate\Http\JsonResponse
     {
         $topics = Topic::publicNews();
 
@@ -40,7 +40,7 @@ class ShowController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function articles(): \Illuminate\Http\JsonResponse
+    public function publicArticles(): \Illuminate\Http\JsonResponse
     {
         $topics = Topic::publicArticles();
 

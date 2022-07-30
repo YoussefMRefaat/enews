@@ -63,7 +63,6 @@ class Category extends Model
     public function resolveRouteBinding($value, $field = null): Model|array
     {
         $category =  $this->findFromCache($value);
-        abort_if(!$category->enabled , 404);
 
         return request()->segment(2) == 'dashboard'
             ? $this->findDashboard($category)
@@ -80,11 +79,11 @@ class Category extends Model
     {
         // Get related data from cache
         if (request()->method() == 'GET'){
-            $category->parent = Category::index()->find($category->parent_id);
+            $category->parent = Category::index()->where('id' , $category->parent_id);
             $category->children = Category::index()->where('parent_id' , $category->id);
             $category->topics = Topic::index()->where('category_id' , $category->id);
             $category->topics->each(function ($topic){
-                $topic->clerk = User::index()->find($topic->clerk_id);
+                $topic->clerk = User::index()->where('id' , $topic->clerk_id);
             });
         }
         return $category;

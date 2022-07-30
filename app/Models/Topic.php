@@ -67,14 +67,45 @@ class Topic extends Model
     {
         $topic = $this->findFromCache($value , 'tags');
         // Get related data from cache
+        return request()->segment(2) == 'dashboard'
+            ? $this->findDashboard($topic)
+            : $this->findPublic($topic);
+    }
+
+    /**
+     * Retrieve the model for the dashboard
+     *
+     * @param $topic
+     * @return Model|null
+     */
+    protected function findDashboard($topic): ?Model
+    {
+        // Get related data from cache
         if (request()->method() == 'GET'){
-            $topic->clerk = User::index()->find($topic->clerk_id);
             $topic->category = Category::index()->find($topic->category_id);
-            $tags = $topic->tags;
-            unset($topic->tags);
-            $topic->tags = Tag::index()->whereIn('id' , $tags->pluck('id')->toArray());
+            $topic->clerk = User::index()->find($topic->clerk_id);
+            $topic->relatedTags = Tag::index()->whereIn('id' , $topic['tags']->pluck('id')->toArray());
         }
-        return $topic;
+        return $topic->setHidden(['tags']);
+    }
+
+    /**
+     * Retrieve the model for the public
+     *
+     * @param $topic
+     * @return Model|null
+     */
+    protected function findPublic($topic): ?Model
+    {
+        // Get related data from cache
+        if (request()->method() == 'GET'){
+            $topic->category = Category::publicIndex()->where('id' , $topic->category_id);
+            $topic->clerk = User::publicIndex()->where('id' , $topic->clerk_id);
+            $topic->relatedTags = Tag::publicIndex()->whereIn('id' , $topic['tags']->pluck('id')->toArray());
+        }
+        if (!$topic->category || !$topic->published)
+            abort(404);
+        return $topic->setVisible(['id' , 'title' , 'body' , 'published_at' , 'category' , 'clerk' , 'relatedTags']);
     }
 
     /**
@@ -89,6 +120,7 @@ class Topic extends Model
         $topics->each(function ($topic){
             $topic->category = Category::index()->where('id' , $topic->category_id);
             $topic->clerk = User::index()->where('id' , $topic->clerk_id);
+            $topic->relatedTags = Tag::publicIndex()->whereIn('id' , $topic['tags']->pluck('id')->toArray());
         });
         return $topics;
     }
@@ -130,11 +162,12 @@ class Topic extends Model
     private function publicIndexRelations($topics): mixed
     {
         $topics->each(function ($topic){
-            $topic->category = Category::index()->find($topic->category_id)->only(['id' , 'name']);
-            $topic->clerk = User::index()->find($topic->clerk_id)->only(['id' , 'name']);
+            $topic->category = Category::publicIndex()->where('id' ,$topic->category_id)->only(['id' , 'name']);
+            $topic->clerk = User::publicIndex()->where('id' , $topic->clerk_id);
+            $topic->relatedTags = Tag::publicIndex()->whereIn('id' , $topic['tags']->pluck('id')->toArray());
         });
 
-        return $topics->map->only(['title' , 'body' , 'created_at' , 'category' , 'clerk']);
+        return $topics->map->only(['title' , 'body' , 'created_at' , 'category' , 'clerk' , 'relatedTags']);
     }
 
     /**

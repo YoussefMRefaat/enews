@@ -19,5 +19,5 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
 //    dd(dd(Topic::publicNews() , Topic::publicArticles()));
-    dd(Cache::get('users'));
+    dd(\App\Models\Tag::publicIndex());
 });

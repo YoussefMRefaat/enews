@@ -14,16 +14,16 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/news' , [\App\Http\Controllers\Topics\ShowController::class , 'news']);
-Route::get('/articles' , [\App\Http\Controllers\Topics\ShowController::class , 'articles']);
+Route::get('/news' , [\App\Http\Controllers\Topics\ShowController::class , 'publicNews']);
+Route::get('/articles' , [\App\Http\Controllers\Topics\ShowController::class , 'publicArticles']);
 Route::get('/clerks' , [\App\Http\Controllers\Clerks\ShowController::class , 'publicIndex']);
 Route::get('/categories' , [\App\Http\Controllers\Categories\ShowController::class , 'publicIndex']);
 Route::get('/tags' , [\App\Http\Controllers\Tags\ShowController::class , 'publicIndex']);
 
-//Route::get('/{topic}');
+Route::get('/topics/{topic}' , [\App\Http\Controllers\Topics\ShowController::class , 'show']);
 Route::get('/clerks/{user}' , [\App\Http\Controllers\Clerks\ShowController::class , 'show']);
 Route::get('/categories/{category}' , [\App\Http\Controllers\Categories\ShowController::class , 'show']);
-//Route::get('/{tag}');
+Route::get('/tags/{tag}' , [\App\Http\Controllers\Tags\ShowController::class , 'show']);
 //
 //Route::post('subscribe');
 

@@ -61,6 +61,7 @@ class Tag extends Model
     public function resolveRouteBinding($value, $field = null): ?Model
     {
         $tag = $this->findFromCache($value , 'topics');
+
         return request()->segment(2) == 'dashboard'
             ? $this->findDashboard($tag)
             : $this->findPublic($tag);
@@ -76,14 +77,17 @@ class Tag extends Model
     {
         // Get related data from cache
         if (request()->method() == 'GET'){
+            $tag->relatedTopics = Topic::index()->filter(function ($topic) use($tag){
+                return in_array($tag->id , $topic['relatedTags']->pluck('id')->toArray());
+            });
         }
-        return $tag;
+        return $tag->setVisible(['id' , 'name' , 'enabled' , 'relatedTopics']);
     }
 
     /**
      * Retrieve the model for the public
      *
-     * @param $category
+     * @param $tag
      * @return Model|null
      */
     protected function findPublic($tag): ?Model
@@ -91,11 +95,14 @@ class Tag extends Model
         if (!$tag->enabled) abort(404);
         // Get related data from cache
         if (request()->method() == 'GET'){
-            $tag->news = Topic::publicIndex(TopicType::News)->filter(function ($topic) use ($tag){
-                return in_array($tag->id , $topic->tags->pluck('id')->toArray());
+            $tag->news = Topic::publicNews()->filter(function ($topic) use ($tag){
+                return in_array($tag->id , $topic['relatedTags']->pluck('id')->toArray());
+            });
+            $tag->articles = Topic::publicArticles()->filter(function ($topic) use ($tag){
+                return in_array($tag->id , $topic['relatedTags']->pluck('id')->toArray());
             });
         }
-        return $category->setVisible(['id' , 'name' , 'parent' , 'children' , 'topics']);
+        return $tag->setVisible(['id' , 'name' , 'enabled' , 'news' , 'articles']);
     }
 
     /**
@@ -116,7 +123,7 @@ class Tag extends Model
     public function scopePublicIndex(): \Illuminate\Support\Collection
     {
         return $this->getFromCache()->where('enabled' , true)
-            ->map->only(['id' , 'name' , 'topics_count']);
+            ->map->only(['id' , 'name' , 'enabled' , 'topics_count']);
     }
 
     /**
